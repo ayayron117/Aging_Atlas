@@ -1,9 +1,6 @@
 Transcriptomic Aging Atlas
 ================
 Aaron Mohammed
-2023-06-17
-
-# *C.elegan* aging atlas
 
 ## Bootstrapping
 
