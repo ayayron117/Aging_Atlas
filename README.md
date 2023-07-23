@@ -1,8 +1,8 @@
-Transcriptomic Aging Atlas
-================
-Aaron Mohammed
+# Transcriptomic Aging Atlas
 
-## Bootstrapping
+## ⚠️ Under construction ⚠️
+
+# Bootstrapping
 
 ``` r
 # Extract the names of the tissues and store them in a vector
@@ -465,7 +465,7 @@ tissuez
     ## [1] "Embroynic_cells" "Germline"        "Hypodermis"      "Intestine"      
     ## [5] "Muscle"          "Neuron"          "Pharynx"         "Vulva_uterus"
 
-## Machine Learning
+# Machine Learning
 
 In this section, the counts data from all 4 wild type (N2) time points
 were used to create age-prediction models or ‘aging clocks’ for each
