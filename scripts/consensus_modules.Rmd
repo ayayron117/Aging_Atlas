@@ -1,0 +1,450 @@
+---
+title: "Consensus"
+author: "Aaron Mohammed"
+date: "2022-11-09"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(hdWGCNA)
+library(Seurat)
+library(tidyverse)
+library(cowplot)
+library(patchwork)
+library(WGCNA) 
+library(enrichR)
+library(GeneOverlap)
+library(pheatmap)
+library(sjmisc)
+library(dplyr)
+library(GeneOverlap)
+library(reshape2)
+library(igraph)
+library(scales)
+library(ggplot2)
+library(RColorBrewer)
+library(xlsx)
+
+```
+
+```{r}
+
+seurat_data <- readRDS(file = '/Users/asm/Creighton/celegan/worm_20221014.rds')
+
+```
+
+```{r}
+
+main_path <- ('/Users/asm/Creighton/celegan/Modules/_consensus')
+other_path <- ('/Users/asm/Creighton/celegan/Modules')
+
+# List the tissue directories that will be analyzed. This is just to get their names.
+tissuez <- list.dirs('/Users/asm/Creighton/celegan/Bootstrap/_tissues_with_3_N2_timepoints',
+                     full.names=FALSE, 
+                     recursive= FALSE)
+
+# Remove embryonic cells
+tissuez <- tissuez[-1]
+
+```
+
+```{r, results='hide', message=FALSE, warning=FALSE}
+
+consensus.modules.func <- function (tissue_name) {
+  
+  tissue_dir <- file.path(main_path, tissue_name)
+  dir.create(tissue_dir)
+  
+  # Strings that specify genotype and tissue
+  consensus_tissue_name <- paste('consensus',sep= '_', tissue_name)
+  
+  Idents(seurat_data)<-"tissue"
+  consensus <- subset(seurat_data,idents = tissue_name)
+  
+  Idents(consensus) <- 'orig.ident'
+  
+  consensus <- subset(consensus,idents= c('N2D1', 'N2D1R', 'N2OPD1', 'N2D6', 
+                                          'N2D12', 'N2D14', 'LIPL4D1', 'LIPL4D6', 
+                                          'DAF2D1', 'DAF2D6', 'RSKS1D1', 'RSKS1D6'))
+  
+  strings <- consensus@meta.data[["genotype"]]
+  strings <- gsub("D1.*","",strings)
+  strings <- gsub("D6.*","",strings)
+
+  
+  # unique(strings) # Output should be: 'LIPL4' 'N2' 'RSKS1' 'DAF2' 
+  
+  consensus <- AddMetaData(consensus, strings, col.name= 'geno')
+  
+  
+  consensus <- SetupForWGCNA(consensus, 
+                             gene_select = 'fraction', 
+                             fraction = 0.05, 
+                             wgcna_name = tissue_name)
+  
+  consensus <- MetacellsByGroups(seurat_obj = consensus,
+                                 group.by = "geno",
+                                 k = 25, 
+                                 max_shared = 10,
+                                 ident.group = "geno")
+  
+  consensus <- NormalizeMetacells(consensus)
+  
+  consensus <- SetMultiExpr(consensus,
+                            multi.group.by='geno', 
+                            assay = 'RNA', 
+                            slot = 'data')
+  
+  # Test different soft powers:
+  consensus <- TestSoftPowers(consensus,
+                              networkType = 'signed')
+  
+  consensus <- ConstructNetwork(consensus,
+                                tom_name = consensus_tissue_name,
+                                tom_outdir = tissue_dir,
+                                overwrite_tom = TRUE) 
+  
+  consensus <- ScaleData(consensus,
+                         features=VariableFeatures(consensus))
+  
+  consensus <- ModuleEigengenes(consensus)
+  
+  consensus <- ModuleConnectivity(consensus)
+  
+  
+  saveRDS(consensus,file.path(tissue_dir, paste0(consensus_tissue_name,
+                                                 sep= '_', 
+                                                 'seurat.RData')))
+
+}
+
+```
+
+```{r}
+
+for (i in 1:4) {
+consensus.modules.func(tissuez[i])
+}
+
+for (i in 6:7) {
+consensus.modules.func(tissuez[i])
+}
+
+```
+
+```{r}
+
+# visualize network with unsupervised UMAP
+
+umap.dendrogram.corr <- function (tissue_name) {
+  
+  tissue_dir <- file.path(main_path, tissue_name)
+  consensus_tissue_name <- paste('consensus',sep= '_', tissue_name)
+  file_name <- paste0(consensus_tissue_name, sep= "_", "seurat", sep= ".", "RData") 
+  
+  consensus <- readRDS(file.path(tissue_dir, file_name))
+  
+  consensus@misc[[tissue_name]][["wgcna_net"]][["TOMFiles"]] <- file.path(tissue_dir, paste(consensus_tissue_name, "_TOM.rda", sep= "")) 
+  
+  # Needed to make results reproducible. Take a look at batch option of umap() in uwot. Using set.seed is an easier way of making the results reproducible.
+  set.seed(1234)
+  
+  consensus <- RunModuleUMAP(
+    consensus,
+    n_hubs = 5,
+    n_neighbors=5,
+    min_dist=0.1,
+    spread=2,
+    target_weight=0.05,
+    supervised=FALSE
+  )
+  
+  pdf(file.path(tissue_dir, "unsupervised_UMAP.pdf"))
+  ModuleUMAPPlot(
+    consensus,
+    edge.alpha=0.5,
+    sample_edges=TRUE,
+    keep_grey_edges=FALSE,
+    edge_prop=0.075,
+    label_hubs=5,
+  )
+  dev.off()
+  
+  ##############################################################################
+
+  # get all sets of modules
+  file_name <- paste0(tissue_name, sep= "_", "modules.RData")
+    
+  consensus_modules <- GetModules(consensus)
+  N2_modules <- readRDS(file.path(other_path,tissue_name, paste("N2", sep= "_", file_name)))
+  LIPL4_modules <- readRDS(file.path(other_path,tissue_name, paste("LIPL4", sep= "_", file_name)))
+  DAF2_modules <- readRDS(file.path(other_path,tissue_name, paste("DAF2", sep= "_", file_name)))
+  RSKS1_modules <- readRDS(file.path(other_path,tissue_name, paste("RSKS1", sep= "_", file_name)))
+  
+  # get consensus dendrogram
+  consensus_net <- GetNetworkData(consensus)
+  dendro <- consensus_net$dendrograms[[1]]
+  
+  # get the gene and module color for consensus
+  consensus_genes <- consensus_modules$gene_name
+  consensus_colors <- consensus_modules$color
+  names(consensus_colors) <- consensus_genes
+  
+  # get the gene and module color for standard
+  N2_genes <- N2_modules$gene_name
+  N2_colors <- N2_modules$color
+  names(N2_colors) <- N2_genes
+  
+  LIPL4_genes <- LIPL4_modules$gene_name
+  LIPL4_colors <- LIPL4_modules$color
+  names(LIPL4_colors) <- LIPL4_genes
+  
+  DAF2_genes <- DAF2_modules$gene_name
+  DAF2_colors <- DAF2_modules$color
+  names(DAF2_colors) <- DAF2_genes
+  
+  RSKS1_genes <- RSKS1_modules$gene_name
+  RSKS1_colors <- RSKS1_modules$color
+  names(RSKS1_colors) <- RSKS1_genes
+  
+  # re-order the genes to match the consensus genes
+  N2_colors <- N2_colors[consensus_genes]
+  LIPL4_colors <- LIPL4_colors[consensus_genes]
+  DAF2_colors <- DAF2_colors[consensus_genes]
+  RSKS1_colors <- RSKS1_colors[consensus_genes]
+  
+  # set up dataframe for plotting
+  color_df <- data.frame(
+    consensus = consensus_colors,
+    N2 = N2_colors,
+    LIPL4= LIPL4_colors,
+    DAF2= DAF2_colors,
+    RSKS1= RSKS1_colors)
+  
+  title <- paste(tissue_name, "Dendrogram", sep= " ")
+  
+  pdf(file.path(tissue_dir, paste(tissue_name, "dendrogram.pdf", sep= "_")))
+  # plot dendrogram using WGCNA function
+  WGCNA::plotDendroAndColors(
+    consensus_net$dendrograms[[1]],
+    color_df,
+    groupLabels=colnames(color_df),
+    dendroLabels = FALSE, hang = 0.03, addGuide = TRUE, guideHang = 0.05,
+    main = title,
+  )
+  dev.off()
+
+  ##############################################################################
+
+  ### Correlation ###
+  strings <- consensus@meta.data[["genotype"]]
+  strings <- gsub("N2D","",strings)
+  strings <- gsub("LIPL4D","",strings)
+  strings <- gsub("DAF2D","",strings)
+  strings <- gsub("RSKS1D","",strings)
+  
+  # unique(strings)
+  
+  consensus <- AddMetaData(consensus, strings, col.name= 'day')
+  
+  Idents(consensus)<-"geno"
+  
+  consensus$day <- as.numeric(consensus$day)
+  consensus$geno <- as.factor(consensus$geno)
+  
+  cur_traits <- c('day','geno')
+  
+  consensus <- ModuleTraitCorrelation(
+    consensus,
+    traits = cur_traits)
+  
+  mt_cor <- GetModuleTraitCorrelation(consensus)
+  
+  N2 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["cor"]][["N2"]]["day",])
+  LIPL4 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["cor"]][["LIPL4"]]["day",])
+  DAF2 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["cor"]][["DAF2"]]["day",])
+  RSKS1 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["cor"]][["RSKS1"]]["day",])
+  
+  day_cor <- rbind(N2,LIPL4,DAF2,RSKS1)
+  row.names(day_cor) <- c("N2","LIPL4","DAF2","RSKS1")
+  
+  N2 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["pval"]][["N2"]]["day",])
+  LIPL4 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["pval"]][["LIPL4"]]["day",])
+  DAF2 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["pval"]][["DAF2"]]["day",])
+  RSKS1 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["pval"]][["RSKS1"]]["day",])
+  
+  day_pval <- rbind(N2,LIPL4,DAF2,RSKS1)
+  row.names(day_pval) <- c("N2","LIPL4","DAF2","RSKS1")
+  
+  write.csv(day_cor,file.path(tissue_dir,"day_cor.csv"))
+  write.csv(day_pval,file.path(tissue_dir,"day_pval.csv"))
+  
+  # max(day_cor)
+  # min(day_cor)
+  # median(day_cor)
+
+  df <- melt(day_cor)
+  
+  colnames(df) <- c("geno","module","cor")
+  
+  p <- ggplot(df, aes(x = module, y = geno, fill = cor)) +
+    geom_tile()+
+    scale_fill_gradientn(colours=colorRampPalette(rev(brewer.pal(n = 7, 
+    name = "RdYlBu")))(100)) 
+  
+  pdf(file.path(tissue_dir,"cor_day.pdf"))
+  print(p)
+  dev.off()
+
+}
+
+```
+
+```{r}
+
+for (i in 2) {
+umap.dendrogram.corr(tissuez[i])
+}
+
+```
+
+
+
+```{r}
+
+tissue_dir <- file.path(main_path, tissue_name)
+  consensus_tissue_name <- paste('consensus',sep= '_', tissue_name)
+  file_name <- paste0(consensus_tissue_name, sep= "_", "seurat", sep= ".", "RData") 
+  
+  consensus <- readRDS(file.path(tissue_dir, file_name))
+  
+  consensus@misc[[tissue_name]][["wgcna_net"]][["TOMFiles"]] <- file.path(tissue_dir, paste(consensus_tissue_name, "_TOM.rda", sep= "")) 
+  
+  set.seed(1234)
+  
+  consensus <- RunModuleUMAP(
+    consensus,
+    n_hubs = 5,
+    n_neighbors=5,
+    min_dist=0.1,
+    spread=2,
+    target_weight=0.05,
+    supervised=FALSE
+  )
+  
+  # pdf(file.path(tissue_dir, "5_hub_unsupervised.pdf"))
+  ModuleUMAPPlot(
+    consensus,
+    edge.alpha=0.5,
+    sample_edges=TRUE,
+    keep_grey_edges=FALSE,
+    edge_prop=0.075,
+    label_hubs=5,
+  )
+  # dev.off()
+  
+  
+  
+  TOM <- GetTOM(consensus)
+  modules <- GetModules(consensus)
+  umap_df <- GetModuleUMAP(consensus)
+  mods <- levels(umap_df$module)
+  mods <- mods[mods != "grey"]
+  subset_TOM <- TOM[umap_df$gene, umap_df$gene[umap_df$hub == 
+    "hub"]]
+  hub_list <- lapply(mods, function(cur_mod) {
+    cur <- subset(modules, module == cur_mod)
+    cur[, c("gene_name", paste0("kME_", cur_mod))] %>% top_n(5) %>% 
+      .$gene_name
+  })
+  names(hub_list) <- mods
+  # hub_labels <- as.character(unlist(hub_list))
+  
+for (i in 1:length(hub_list)) {
+write.xlsx(hub_list[[i]], file=file.path(tissue_dir, "hub_genes.xlsx"), sheetName=names(hub_list[i]), row.names=FALSE, append=TRUE, col.names= FALSE)
+}
+  
+```
+
+
+```{r}
+
+age.cor.heatmap <- function (tissue_name) {
+  
+  tissue_dir <- file.path(main_path, tissue_name)
+  
+  consensus_tissue_name <- paste('consensus',sep= '_', tissue_name)
+  file_name <- paste0(consensus_tissue_name, sep= "_", "seurat", sep= ".", "RData") 
+  consensus <- readRDS(file.path(tissue_dir, file_name))
+
+  ### Correlation ###
+  strings <- consensus@meta.data[["genotype"]]
+  strings <- gsub("N2D","",strings)
+  strings <- gsub("LIPL4D","",strings)
+  strings <- gsub("DAF2D","",strings)
+  strings <- gsub("RSKS1D","",strings)
+  
+  # unique(strings)
+  
+  consensus <- AddMetaData(consensus, strings, col.name= 'day')
+  
+  Idents(consensus)<-"geno"
+  
+  consensus$day <- as.numeric(consensus$day)
+  consensus$geno <- as.factor(consensus$geno)
+  
+  cur_traits <- c('day','geno')
+  
+  consensus <- ModuleTraitCorrelation(
+    consensus,
+    traits = cur_traits)
+  
+  mt_cor <- GetModuleTraitCorrelation(consensus)
+  
+  N2 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["cor"]][["N2"]]["day",])
+  LIPL4 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["cor"]][["LIPL4"]]["day",])
+  DAF2 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["cor"]][["DAF2"]]["day",])
+  RSKS1 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["cor"]][["RSKS1"]]["day",])
+  
+  day_cor <- rbind(N2,LIPL4,DAF2,RSKS1)
+  row.names(day_cor) <- c("N2","LIPL4","DAF2","RSKS1")
+  
+  N2 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["pval"]][["N2"]]["day",])
+  LIPL4 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["pval"]][["LIPL4"]]["day",])
+  DAF2 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["pval"]][["DAF2"]]["day",])
+  RSKS1 <- t(consensus@misc[[tissue_name]][["mt_cor"]][["pval"]][["RSKS1"]]["day",])
+  
+  day_pval <- rbind(N2,LIPL4,DAF2,RSKS1)
+  row.names(day_pval) <- c("N2","LIPL4","DAF2","RSKS1")
+  
+  # write.csv(day_cor,file.path(tissue_dir,"day_cor.csv"))
+  # write.csv(day_pval,file.path(tissue_dir,"day_pval.csv"))
+  
+  # max(day_cor)
+  # min(day_cor)
+  # median(day_cor)
+  
+  colorRampPalette(brewer.pal(9,"Blues"))(100)-> heat.colors
+  
+  pdf(file.path(tissue_dir, paste(tissue_name, "heatmap.pdf", sep="_")))
+  pheatmap(day_cor,scale = "none",cluster_rows=T,cluster_col=F,color = heat.colors,border_color=NA)
+  dev.off()
+  
+}    
+
+```
+
+```{r}
+
+for (i in 1:length(tissuez)) {
+age.cor.heatmap(tissuez[i])
+}
+  
+```
+
+
+
+
+
+

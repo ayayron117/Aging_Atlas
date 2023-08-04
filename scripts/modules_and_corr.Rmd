@@ -1,0 +1,551 @@
+---
+title: 'Modules and correlations'
+author: 'Aaron Mohammed'
+date: '2022-11-03'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(hdWGCNA)
+library(Seurat)
+library(tidyverse)
+library(cowplot)
+library(patchwork)
+library(WGCNA) 
+library(enrichR)
+library(GeneOverlap)
+library(pheatmap)
+library(sjmisc)
+library(dplyr)
+library(GeneOverlap)
+
+```
+
+```{r}
+
+seurat_data <- readRDS(file = '/Users/asm/Creighton/celegan/worm_20221014.rds')
+
+```
+
+```{r}
+
+main_path <- ('/Users/asm/Creighton/celegan/Modules')
+
+# List the tissue directories that will be analyzed. This is just to get their names.
+tissuez <- list.dirs('/Users/asm/Creighton/celegan/Bootstrap/_tissues_with_3_N2_timepoints',
+                     full.names=FALSE, 
+                     recursive= FALSE)
+
+# Remove embryonic cells
+tissuez <- tissuez[-1]
+
+```
+
+```{r}
+
+modules.correlations.func <- function (tissue_name) {
+  
+  tissue_dir <- file.path(main_path, tissue_name)
+  dir.create(tissue_dir)
+  
+  # Strings that specify genotype and tissue
+  N2_tissue_name <- paste('N2',sep= '_', tissue_name)
+  LIPL4_tissue_name <- paste('LIPL4',sep= '_', tissue_name)
+  DAF2_tissue_name <- paste('DAF2',sep= '_', tissue_name)
+  RSKS1_tissue_name <- paste('RSKS1',sep= '_', tissue_name)
+  
+  # Subset the tissue
+  Idents(seurat_data)<-'tissue'
+  T_seurat <- subset(seurat_data,idents = tissue_name)
+  
+  # Subset the samples
+  Idents(T_seurat) <- 'orig.ident'
+  T_seurat <- subset(T_seurat,idents= c('N2D1', 'N2D1R', 'N2OPD1', 'N2D6', 'N2D12', 
+                                        'N2D14', 'LIPL4D1', 'LIPL4D6', 'DAF2D1', 
+                                        'DAF2D6', 'RSKS1D1', 'RSKS1D6'))
+   
+  # Add a column in meta.data that specifies the genotype
+  strings <- T_seurat@meta.data[['orig.ident']]
+  strings <- gsub('D1.*','',strings)
+  strings <- gsub('D6.*','',strings)
+  strings <- gsub('OP','',strings)
+  
+  # unique(strings) # Output should be: 'LIPL4' 'N2' 'RSKS1' 'DAF2' 
+  
+  T_seurat <- AddMetaData(T_seurat, strings, col.name= 'geno')
+  
+  ##############################################################################
+                                    # Modules
+  ##############################################################################
+  
+  # Begin setup for WGCNA
+  T_seurat <- SetupForWGCNA(T_seurat, 
+                             gene_select = 'fraction', 
+                             fraction = 0.05, 
+                             wgcna_name = tissue_name)
+  
+  # Create metacells for each genotype
+  T_seurat <- MetacellsByGroups(seurat_obj = T_seurat,
+                                group.by = 'geno',
+                                k = 25, # nearest-neighbors parameter
+                                max_shared = 10, 
+                                ident.group = 'geno')
+  
+  # Normalize the metacells
+  T_seurat <- NormalizeMetacells(T_seurat)
+  
+  ##############################################################################
+  
+  # Setup expression matrix 
+  N2_T_seurat <- SetDatExpr(T_seurat,
+                            group_name = 'N2',
+                            group.by= 'geno', 
+                            assay = 'RNA', 
+                            slot = 'data')
+  
+  # Test different soft powers
+  N2_T_seurat <- TestSoftPowers(N2_T_seurat,
+                                networkType = 'signed')
+  
+  # Construct the co-expression network
+  N2_T_seurat <- ConstructNetwork(N2_T_seurat, 
+                                  tom_name = N2_tissue_name,
+                                  tom_outdir = tissue_dir,
+                                  overwrite_tom = TRUE) 
+  
+  ##############################################################################
+  
+  # Setup expression matrix 
+  LIPL4_T_seurat <- SetDatExpr(T_seurat,
+                               group_name = 'LIPL4', 
+                               group.by= 'geno', 
+                               assay = 'RNA', 
+                               slot = 'data')
+  
+  # Test different soft powers
+  LIPL4_T_seurat <- TestSoftPowers(LIPL4_T_seurat,
+                                   networkType = 'signed')
+  
+  # Construct the co-expression network
+  LIPL4_T_seurat <- ConstructNetwork(LIPL4_T_seurat,
+                                     tom_name = LIPL4_tissue_name,
+                                     tom_outdir = tissue_dir,
+                                     overwrite_tom = TRUE) 
+  
+  ##############################################################################
+  
+  # Setup expression matrix 
+  DAF2_T_seurat <- SetDatExpr(T_seurat, 
+                              group_name = 'DAF2', 
+                              group.by= 'geno', 
+                              assay = 'RNA', 
+                              slot = 'data')
+  
+  # Test different soft powers
+  DAF2_T_seurat <- TestSoftPowers(DAF2_T_seurat,
+                                  networkType = 'signed')
+  
+  # Construct the co-expression network
+  DAF2_T_seurat <- ConstructNetwork(DAF2_T_seurat,
+                                    tom_name = DAF2_tissue_name,
+                                    tom_outdir = tissue_dir,
+                                    overwrite_tom = TRUE) 
+  
+  ##############################################################################
+  
+  # Setup expression matrix 
+  RSKS1_T_seurat <- SetDatExpr(T_seurat,
+                               group_name = 'RSKS1',
+                               group.by= 'geno',
+                               assay = 'RNA',
+                               slot = 'data')
+  
+  # Test different soft powers
+  RSKS1_T_seurat <- TestSoftPowers(RSKS1_T_seurat,
+                                   networkType = 'signed')
+  
+  # Construct the co-expression network
+  RSKS1_T_seurat <- ConstructNetwork(RSKS1_T_seurat,
+                                     tom_name = RSKS1_tissue_name,
+                                     tom_outdir = tissue_dir,
+                                     overwrite_tom = TRUE)
+  
+  ##############################################################################
+  
+  # Scale and center the data
+  N2_T_seurat <- ScaleData(N2_T_seurat, 
+                           features=VariableFeatures(N2_T_seurat))
+  
+  # Compute the module eigengenes 
+  N2_T_seurat <- ModuleEigengenes(N2_T_seurat)
+  
+  ##############################################################################
+  
+  # Scale and center the data
+  LIPL4_T_seurat <- ScaleData(LIPL4_T_seurat, 
+                              features=VariableFeatures(LIPL4_T_seurat))
+  
+  # Compute the module eigengenes
+  LIPL4_T_seurat <- ModuleEigengenes(LIPL4_T_seurat)
+  
+  ##############################################################################
+  
+  # Scale and center the data
+  DAF2_T_seurat <- ScaleData(DAF2_T_seurat,
+                             features=VariableFeatures(DAF2_T_seurat))
+  
+  # Compute the module eigengenes
+  DAF2_T_seurat <- ModuleEigengenes(DAF2_T_seurat)
+  
+  ##############################################################################
+  
+  # Scale and center the data
+  RSKS1_T_seurat <- ScaleData(RSKS1_T_seurat,
+                              features=VariableFeatures(RSKS1_T_seurat))
+  
+  # Compute the module eigengenes
+  RSKS1_T_seurat <- ModuleEigengenes(RSKS1_T_seurat)
+  
+  ##############################################################################
+  
+  # Compute eigengene-based connectivity (kME)
+  N2_T_seurat <- ModuleConnectivity(N2_T_seurat)
+  LIPL4_T_seurat <- ModuleConnectivity(LIPL4_T_seurat)
+  DAF2_T_seurat <- ModuleConnectivity(DAF2_T_seurat)
+  RSKS1_T_seurat <- ModuleConnectivity(RSKS1_T_seurat)
+
+  ##############################################################################
+                                  # Correlation
+  ##############################################################################
+  
+  strings <- N2_T_seurat@meta.data[['genotype']]
+  strings <- gsub('N2','',strings)
+  strings <- gsub('LIPL4','',strings)
+  strings <- gsub('DAF2','',strings)
+  strings <- gsub('RSKS1','',strings)
+  strings <- gsub('R','',strings)
+  strings <- gsub('D','',strings)
+  
+  # unique(strings) # Output should be: '1'  '6'  '14' '12'
+  
+  N2_T_seurat <- AddMetaData(N2_T_seurat, strings, col.name= 'day')
+  
+  ##############################################################################
+  
+  strings <- LIPL4_T_seurat@meta.data[['genotype']]
+  strings <- gsub('N2','',strings)
+  strings <- gsub('LIPL4','',strings)
+  strings <- gsub('DAF2','',strings)
+  strings <- gsub('RSKS1','',strings)
+  strings <- gsub('R','',strings)
+  strings <- gsub('D','',strings)
+  
+  # unique(strings) # Output should be: '1'  '6'  '14' '12'
+  
+  LIPL4_T_seurat <- AddMetaData(LIPL4_T_seurat, strings, col.name= 'day')
+  
+  ##############################################################################
+  
+  strings <- DAF2_T_seurat@meta.data[['genotype']]
+  strings <- gsub('N2','',strings)
+  strings <- gsub('LIPL4','',strings)
+  strings <- gsub('DAF2','',strings)
+  strings <- gsub('RSKS1','',strings)
+  strings <- gsub('R','',strings)
+  strings <- gsub('D','',strings)
+  
+  # unique(strings) # Output should be: '1'  '6'  '14' '12'
+  
+  DAF2_T_seurat <- AddMetaData(DAF2_T_seurat, strings, col.name= 'day')
+  
+  ##############################################################################
+  
+  strings <- RSKS1_T_seurat@meta.data[['genotype']]
+  strings <- gsub('N2','',strings)
+  strings <- gsub('LIPL4','',strings)
+  strings <- gsub('DAF2','',strings)
+  strings <- gsub('RSKS1','',strings)
+  strings <- gsub('R','',strings)
+  strings <- gsub('D','',strings)
+  
+  # unique(strings) # Output should be: '1'  '6'  '14' '12'
+  
+  RSKS1_T_seurat <- AddMetaData(RSKS1_T_seurat, strings, col.name= 'day')
+  
+  ##############################################################################
+  
+  ### Correlation ###
+  
+  N2_T_seurat$day <- as.numeric(N2_T_seurat$day)
+  
+  cur_traits <- c('day','nCount_RNA')
+  
+  Idents(N2_T_seurat)<-'geno'
+  
+  N2_T_seurat <- ModuleTraitCorrelation(
+    N2_T_seurat,
+    subset_by = 'geno',
+    subset_groups = 'N2',
+    traits = cur_traits)
+  
+  N2_mt_cor <- GetModuleTraitCorrelation(N2_T_seurat)
+  
+  N2_cor_pval <- as.data.frame(t(N2_mt_cor[['cor']][['N2']]['day',]))
+  N2_cor_pval[2,] <- N2_mt_cor[['pval']][['N2']]['day',]
+  
+  row.names(N2_cor_pval) <- c('cor','pval')
+  
+  ##############################################################################
+  
+  LIPL4_T_seurat$day <- as.numeric(LIPL4_T_seurat$day)
+  
+  cur_traits <- c('day','nCount_RNA')
+  
+  Idents(LIPL4_T_seurat)<-'geno'
+  
+  LIPL4_T_seurat <- ModuleTraitCorrelation(
+    LIPL4_T_seurat,
+    subset_by = 'geno',
+    subset_groups = 'LIPL4',
+    traits = cur_traits)
+  
+  LIPL4_mt_cor <- GetModuleTraitCorrelation(LIPL4_T_seurat)
+  
+  LIPL4_cor_pval <- as.data.frame(t(LIPL4_mt_cor[['cor']][['LIPL4']]['day',]))
+  LIPL4_cor_pval[2,] <- LIPL4_mt_cor[['pval']][['LIPL4']]['day',]
+  
+  row.names(LIPL4_cor_pval) <- c('cor','pval')
+  
+  ##############################################################################
+  
+  DAF2_T_seurat$day <- as.numeric(DAF2_T_seurat$day)
+  
+  cur_traits <- c('day','nCount_RNA')
+  
+  Idents(DAF2_T_seurat)<-'geno'
+  
+  DAF2_T_seurat <- ModuleTraitCorrelation(
+    DAF2_T_seurat,
+    subset_by = 'geno',
+    subset_groups = 'DAF2',
+    traits = cur_traits)
+  
+  DAF2_mt_cor <- GetModuleTraitCorrelation(DAF2_T_seurat)
+  
+  DAF2_cor_pval <- as.data.frame(t(DAF2_mt_cor[['cor']][['DAF2']]['day',]))
+  DAF2_cor_pval[2,] <- DAF2_mt_cor[['pval']][['DAF2']]['day',]
+  
+  row.names(DAF2_cor_pval) <- c('cor','pval')
+  
+  ##############################################################################
+  
+  RSKS1_T_seurat$day <- as.numeric(RSKS1_T_seurat$day)
+  
+  cur_traits <- c('day','nCount_RNA')
+  
+  Idents(RSKS1_T_seurat)<-'geno'
+  
+  RSKS1_T_seurat <- ModuleTraitCorrelation(
+    RSKS1_T_seurat,
+    subset_by = 'geno',
+    subset_groups = 'RSKS1',
+    traits = cur_traits)
+  
+  RSKS1_mt_cor <- GetModuleTraitCorrelation(RSKS1_T_seurat)
+  
+  RSKS1_cor_pval <- as.data.frame(t(RSKS1_mt_cor[['cor']][['RSKS1']]['day',]))
+  RSKS1_cor_pval[2,] <- RSKS1_mt_cor[['pval']][['RSKS1']]['day',]
+  
+  row.names(RSKS1_cor_pval) <- c('cor','pval')
+  
+  ##############################################################################
+  
+  CP_N2 <- N2_cor_pval
+  CP_N2 <- as.data.frame(t(CP_N2))
+  CP_N2$pval[CP_N2$pval==0] <- 1e-10
+  CP_N2$pval <- -log10(CP_N2$pval)
+  names <- rownames(CP_N2)
+  CP_N2$color <- names
+  rownames(CP_N2) <- paste0('N2',sep='_',names)
+  CP_N2$genotype <-  gsub('_.*','',rownames(CP_N2))
+  
+  CP_LIPL4 <- LIPL4_cor_pval
+  CP_LIPL4 <- as.data.frame(t(CP_LIPL4))
+  CP_LIPL4$pval[CP_LIPL4$pval==0] <- 1e-10
+  CP_LIPL4$pval <- -log10(CP_LIPL4$pval)
+  names <- rownames(CP_LIPL4)
+  CP_LIPL4$color <- names
+  rownames(CP_LIPL4) <- paste0('LIPL4',sep='_',names)
+  CP_LIPL4$genotype <-  gsub('_.*','',rownames(CP_LIPL4))
+  
+  CP_DAF2 <- DAF2_cor_pval
+  CP_DAF2 <- as.data.frame(t(CP_DAF2))
+  CP_DAF2$pval[CP_DAF2$pval==0] <- 1e-10
+  CP_DAF2$pval <- -log10(CP_DAF2$pval)
+  names <- rownames(CP_DAF2)
+  CP_DAF2$color <- names
+  rownames(CP_DAF2) <- paste0('DAF2',sep='_',names)
+  CP_DAF2$genotype <-  gsub('_.*','',rownames(CP_DAF2))
+  
+  CP_RSKS1 <- RSKS1_cor_pval
+  CP_RSKS1 <- as.data.frame(t(CP_RSKS1))
+  CP_RSKS1$pval[CP_RSKS1$pval==0] <- 1e-10
+  CP_RSKS1$pval <- -log10(CP_RSKS1$pval)
+  names <- rownames(CP_RSKS1)
+  CP_RSKS1$color <- names
+  rownames(CP_RSKS1) <- paste0('RSKS1',sep='_',names)
+  CP_RSKS1$genotype <-  gsub('_.*','',rownames(CP_RSKS1))
+
+  ##############################################################################
+
+  colors_N2 <- as.data.frame(CP_N2[CP_N2$pval==10,'color'])
+  colors_N2[,1] <- paste('N2', sep='_', colors_N2[,])
+  colnames(colors_N2) <- c('color')
+  
+  colors_LIPL4 <- as.data.frame(CP_LIPL4[CP_LIPL4$pval==10,'color'])
+  colors_LIPL4[,1] <- paste('LIPL4', sep='_', colors_LIPL4[,])
+  colnames(colors_LIPL4) <- c('color')
+  
+  colors_DAF2 <- as.data.frame(CP_DAF2[CP_DAF2$pval==10,'color'])
+  colors_DAF2[,1] <- paste('DAF2', sep='_', colors_DAF2[,])
+  colnames(colors_DAF2) <- c('color')
+  
+  colors_RSKS1 <- as.data.frame(CP_RSKS1[CP_RSKS1$pval==10,'color'])
+  colors_RSKS1[,1] <- paste('RSKS1', sep='_', colors_RSKS1[,])
+  colnames(colors_RSKS1) <- c('color')
+  
+  L_colorz <- do.call(rbind,list(colors_N2, colors_LIPL4, colors_DAF2, colors_RSKS1))
+  
+  ##############################################################################
+  
+  N2_modules <- GetModules(N2_T_seurat)
+  LIPL4_modules <- GetModules(LIPL4_T_seurat)
+  DAF2_modules <- GetModules(DAF2_T_seurat)
+  RSKS1_modules <- GetModules(RSKS1_T_seurat)
+  
+  L_all_modz <- list(N2_modules, LIPL4_modules, DAF2_modules, RSKS1_modules)
+  names(L_all_modz) <- c('N2', 'LIPL4', 'DAF2', 'RSKS1')
+  
+  L_modz <- {}
+  
+  for (i in 1:nrow(L_colorz)) {
+    geno <- gsub('_.*', '', L_colorz$color[i])
+    color <- gsub('.*_', '', L_colorz$color[i])
+    
+    mod <- L_all_modz[[geno]][L_all_modz[[geno]]$module == color,] 
+  
+    L_modz[[i]] <- mod
+  }
+    
+  names(L_modz) <- L_colorz[,]
+  
+  ##############################################################################
+    
+  genome.size <- nrow(N2_modules)
+  overlapz <- {}
+  namez <- {}
+  index <- 0
+  
+  for (i in 1:length(L_modz)) {
+    A <- L_colorz[i,1]
+    
+    for (j in 1:length(L_modz)) {
+      geno_A <- gsub('_.*','',L_colorz$color[i])
+      geno_B <- gsub('_.*','',L_colorz$color[j])
+      
+      if (geno_A != geno_B) {
+      B <- L_colorz[j,1]
+      
+      mod_1 <- L_modz[[A]]
+      mod_2 <- L_modz[[B]]
+      
+      index = index + 1
+  
+      overlapz[[index]] <- testGeneOverlap(newGeneOverlap(mod_1$gene_name,
+                                                          mod_2$gene_name, 
+                                                          genome.size = genome.size))
+      namez[[index]] <- paste(A, sep='-', B)
+      }
+    }
+  }
+  
+  names(overlapz) <- namez
+  
+  ##############################################################################
+  
+  genez <- {}
+  
+  for (i in 1:length(L_modz)) {
+    genez[[i]] <- L_modz[[i]][,1:2]
+  }
+  
+  names(genez) <- names(L_modz)
+  
+  ##############################################################################
+  
+  overlap <- as.data.frame(matrix(nrow= length(overlapz), ncol= 6))
+  names(overlap) <- c('M1','M2','M1_size','M2_size','Intersection_size','pval')
+  overlap_names <- names(overlapz)
+  
+  for (i in 1:length(overlapz)) {
+    name_mod_1 <- gsub('-.*','',overlap_names[i])
+    name_mod_2 <- gsub('.*-','',overlap_names[i])
+    
+    overlap[i,'M1'] <- name_mod_1
+    overlap[i,'M2'] <- name_mod_2
+    overlap[i,'M1_size'] <- length(overlapz[[i]]@listA)
+    overlap[i,'M2_size'] <- length(overlapz[[i]]@listB)
+    overlap[i,'Intersection_size'] <- length(overlapz[[i]]@intersection)
+    overlap[i,'pval'] <- overlapz[[i]]@pval
+  }
+  
+  ##############################################################################
+  
+  # saveRDS(N2_T_seurat, file.path(tissue_dir, paste0(N2_tissue_name, sep= '_', 'seurat.RData')))
+  # saveRDS(LIPL4_T_seurat, file.path(tissue_dir, paste0(LIPL4_tissue_name, sep= '_', 'seurat.RData')))
+  # saveRDS(DAF2_T_seurat, file.path(tissue_dir, paste0(DAF2_tissue_name, sep= '_', 'seurat.RData')))
+  # saveRDS(RSKS1_T_seurat, file.path(tissue_dir, paste0(RSKS1_tissue_name, sep= '_', 'seurat.RData')))
+
+  saveRDS(N2_modules, file.path(tissue_dir, paste0(N2_tissue_name, sep= '_', 'modules.RData')))
+  saveRDS(LIPL4_modules, file.path(tissue_dir, paste0(LIPL4_tissue_name, sep= '_', 'modules.RData')))
+  saveRDS(DAF2_modules, file.path(tissue_dir, paste0(DAF2_tissue_name, sep= '_', 'modules.RData')))
+  saveRDS(RSKS1_modules, file.path(tissue_dir, paste0(RSKS1_tissue_name, sep= '_', 'modules.RData')))
+
+  saveRDS(CP_N2, file.path(tissue_dir, paste0('CP', sep= '_', N2_tissue_name, sep= '', '.RData')))
+  saveRDS(CP_LIPL4, file.path(tissue_dir, paste0('CP', sep= '_', LIPL4_tissue_name, sep= '', '.RData')))
+  saveRDS(CP_DAF2, file.path(tissue_dir, paste0('CP', sep= '_', DAF2_tissue_name, sep= '', '.RData')))
+  saveRDS(CP_RSKS1, file.path(tissue_dir, paste0('CP', sep= '_', RSKS1_tissue_name, sep= '', '.RData')))
+  
+  writexl::write_xlsx(genez, path=file.path(tissue_dir,paste(tissue_name, sep= '_', 'gene_lists.xlsx')))
+  
+  write.csv(overlap, file.path(tissue_dir,paste(tissue_name, sep= '_', 'overlap.csv')))
+
+}
+
+```
+
+```{r}
+
+# modules.correlations.func(tissuez[2])
+
+```
+
+```{r}
+
+for (i in 4:length(tissuez)) {modules.correlations.func(tissuez[i])}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

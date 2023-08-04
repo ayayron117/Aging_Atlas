@@ -1,0 +1,97 @@
+---
+title: "pathway analysis"
+author: "Aaron Mohammed"
+date: "2022-12-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(clusterProfiler)
+library(org.Ce.eg.db)
+library(hdWGCNA)
+
+main_path <- "/Users/asm/Creighton/celegan/Modules/_consensus/Intestine"
+
+```
+
+```{r}
+
+consensus <- readRDS("/Users/asm/Creighton/celegan/Modules/_consensus/Intestine/consensus_Intestine_seurat.RData")
+
+consensus_modules <- GetModules(consensus)
+con_modz <- consensus_modules[,1:2]
+colorz <- unique(con_modz$module)
+
+modz <- list()
+
+for (i in 1:length(colorz)) {
+modz[[i]] <- con_modz$gene_name[which(con_modz$module == colorz[i])]
+}
+
+names(modz) <- colorz
+
+```
+
+```{r}
+
+kegg_dir <- file.path(main_path, "KEGG")
+dir.create(kegg_dir)
+go_dir <- file.path(main_path, "GO")
+dir.create(go_dir)
+
+```
+
+```{r}
+
+for (i in 1:length(modz)) {
+  
+gene_list <- modz[[i]]
+
+eg = bitr(gene_list, fromType="SYMBOL", toType=c("ENSEMBL","ENTREZID","UNIPROT"), OrgDb="org.Ce.eg.db")
+eg2=bitr_kegg(eg$UNIPROT,fromType='uniprot',toType = "kegg" ,organism = 'cel')
+
+kegg_up <- enrichKEGG(gene         = eg2$kegg,
+                 organism     = 'cel',
+                 pvalueCutoff = 0.05)
+
+module <- names(modz[i])
+
+pdf(file.path(kegg_dir, paste(module, "KEGG.pdf", sep="_")))
+print(barplot(kegg_up, main = module))
+dev.off()
+
+}
+
+```
+
+```{r}
+
+for (i in 1:length(modz)) {
+  
+gene_list <- modz[[i]]
+
+eg = bitr(gene_list, fromType="SYMBOL", toType=c("ENSEMBL","ENTREZID","UNIPROT"), OrgDb="org.Ce.eg.db")
+eg2=bitr_kegg(eg$UNIPROT,fromType='uniprot',toType = "kegg" ,organism = 'cel')
+
+GO_up <- enrichGO(gene         = eg$ENTREZID,
+               OrgDb= "org.Ce.eg.db",
+               pvalueCutoff = 0.05)
+
+module <- names(modz[i])
+
+pdf(file.path(go_dir, paste(module, "GO.pdf", sep="_")))
+print(barplot(GO_up, main = module))
+dev.off()
+
+}
+
+```
+
+
+
+
+
+
+
+
