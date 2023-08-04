@@ -1,8 +1,8 @@
-Transcriptomic Aging Atlas
-================
-Aaron Mohammed
+# Transcriptomic Aging Atlas
 
-## Bootstrapping
+## ⚠️ Under construction ⚠️
+
+# Bootstrapping
 
 ``` r
 # Extract the names of the tissues and store them in a vector
@@ -19,8 +19,6 @@ tissuez
     ## [11] "Pharynx"                      "Spermatheca"                 
     ## [13] "Sperms"                       "Uterine_seam_cell"           
     ## [15] "Vulva_uterus"
-
-Bootsrapping
 
 For each tissue of each genotype of each day, 15 cells were randomly
 sampled and the counts associated with each of the 26208 genes were
@@ -467,7 +465,7 @@ tissuez
     ## [1] "Embroynic_cells" "Germline"        "Hypodermis"      "Intestine"      
     ## [5] "Muscle"          "Neuron"          "Pharynx"         "Vulva_uterus"
 
-Machine Learning
+# Machine Learning
 
 In this section, the counts data from all 4 wild type (N2) time points
 were used to create age-prediction models or ‘aging clocks’ for each
@@ -648,38 +646,6 @@ age.prediction(tissuez[i])
 }
 ```
 
-    ## Warning in dir.create(output_dir):
-    ## '/Users/asm/Documents/git_for_jobs/Predictions_using_wild_type_models/Embroynic_cells'
-    ## already exists
-
-    ## Warning in dir.create(output_dir):
-    ## '/Users/asm/Documents/git_for_jobs/Predictions_using_wild_type_models/Germline'
-    ## already exists
-
-    ## Warning in dir.create(output_dir):
-    ## '/Users/asm/Documents/git_for_jobs/Predictions_using_wild_type_models/Hypodermis'
-    ## already exists
-
-    ## Warning in dir.create(output_dir):
-    ## '/Users/asm/Documents/git_for_jobs/Predictions_using_wild_type_models/Intestine'
-    ## already exists
-
-    ## Warning in dir.create(output_dir):
-    ## '/Users/asm/Documents/git_for_jobs/Predictions_using_wild_type_models/Muscle'
-    ## already exists
-
-    ## Warning in dir.create(output_dir):
-    ## '/Users/asm/Documents/git_for_jobs/Predictions_using_wild_type_models/Neuron'
-    ## already exists
-
-    ## Warning in dir.create(output_dir):
-    ## '/Users/asm/Documents/git_for_jobs/Predictions_using_wild_type_models/Pharynx'
-    ## already exists
-
-    ## Warning in dir.create(output_dir):
-    ## '/Users/asm/Documents/git_for_jobs/Predictions_using_wild_type_models/Vulva_uterus'
-    ## already exists
-
 ``` r
 LIPL4_ <- data.frame(matrix(ncol = 3, nrow = length(tissuez)))
 
@@ -778,9 +744,6 @@ RSKS1[,3] <- rep(c("RSKS1"),nrow(RSKS1))
 colnames(RSKS1) <- c('lambda.min','Tissue','Genotype')
 
 
-
-
-
 # Plot
 
 df_list <- list(LIPL4, DAF2, RSKS1)
@@ -824,9 +787,6 @@ pdf(file.path(main_path, "Predictions_using_wild_type_models", "predicted_ages.p
 All_genotypes_boxplot  
 dev.off()
 ```
-
-    ## quartz_off_screen 
-    ##                 2
 
 ``` r
 All_genotypes_boxplot
