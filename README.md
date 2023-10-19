@@ -1,7 +1,5 @@
 # Transcriptomic Aging Atlas
 
-## ⚠️ Under construction ⚠️
-
 # Bootstrapping
 
 ``` r
