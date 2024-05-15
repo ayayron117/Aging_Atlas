@@ -3,6 +3,18 @@ Bootstraping
 Aaron Mohammed
 
 ``` r
+library(Seurat)
+library(SingleCellExperiment)
+library(R.utils)
+
+readRDS(raw_data_path) -> seurat_data
+
+Idents(seurat_data)<-"tissue"
+main_tissues <- table(seurat_data[[]]$tissue)
+tissuez <- names(main_tissues)
+```
+
+``` r
 # Bootsrapping function that takes a character vector of tissue names as input
 
 bootstrap.cells <- function (tissue) {
