@@ -40,7 +40,7 @@ for (t in tissuez) {
                                 colData = metadata)
     cells <- colData(sce)[, c("genotype")]
   
-    # Only evaluate if there are at least 50 cells
+    # For statistical significance, skip if there are less than 50 cells
     if (length(cells) >= 50) { 
       
       # Create a character vector that will be used for labeling cells
@@ -53,13 +53,13 @@ for (t in tissuez) {
                              replace=FALSE)]
       
       # Aggregate the count matrix according to the labels
-      labeled <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                                                 groupings = labels,
-                                                 fun = "sum") 
+      samp <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
+                                              groupings = labels,
+                                              fun = "sum") 
       
       # Extract the aggregated counts for the cells that were labeled as pos and
       # store in a data frame called Day
-      Day <- data.frame(labeled=labeled['pos',])
+      Day <- data.frame(samp = samp['pos',])
       
       # Repeat the same steps 100 more times and each time append the result to
       # the Day data frame
@@ -69,10 +69,10 @@ for (t in tissuez) {
         'pos' -> labels[sample(c(1:length(cells)),
                                size=15,
                                replace=FALSE)]
-        labeled <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
+        samp <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
                                                    groupings = labels, 
                                                    fun = "sum") 
-        Day <- cbind(Day,labeled['pos',])
+        Day <- cbind(Day,samp['pos',])
       }
       
         # Save the Day data frame as a csv file in the tissue directory
@@ -95,36 +95,25 @@ for (t in tissuez) {
 tissue_path <- file.path(bootstrap_path, "Neuron")
 
 N2D1 <- read.csv(file.path(tissue_path, "N2D1.csv"), row.names = 1)
-N2D1[1:10, 1:5]
+N2D1[1:10, 1:4]
 ```
 
-    ##        labeled labeled..pos.... labeled..pos.....1 labeled..pos.....2
-    ## nduo-6      13               13                  3                  7
-    ## ndfl-4       3                3                  0                  0
-    ## MTCE.7       3                5                  1                  3
-    ## nduo-1       6                4                  0                  0
-    ## atp-6       13               15                  8                 13
-    ## nduo-2       7                1                  3                  0
-    ## ctb-1        1                9                  3                  4
-    ## ctc-3       15               12                  4                  8
-    ## nduo-4       4                4                  1                  5
-    ## ctc-1       26               16                 17                 19
-    ##        labeled..pos.....3
-    ## nduo-6                 13
-    ## ndfl-4                  7
-    ## MTCE.7                 11
-    ## nduo-1                 10
-    ## atp-6                  32
-    ## nduo-2                  4
-    ## ctb-1                  20
-    ## ctc-3                  54
-    ## nduo-4                  7
-    ## ctc-1                  68
+    ##        samp samp..pos.... samp..pos.....1 samp..pos.....2
+    ## nduo-6   13            13               3               7
+    ## ndfl-4    3             3               0               0
+    ## MTCE.7    3             5               1               3
+    ## nduo-1    6             4               0               0
+    ## atp-6    13            15               8              13
+    ## nduo-2    7             1               3               0
+    ## ctb-1     1             9               3               4
+    ## ctc-3    15            12               4               8
+    ## nduo-4    4             4               1               5
+    ## ctc-1    26            16              17              19
 
 ``` r
-# Not all tissues contained all time points for N2. The ones that did have
-# day 1, day 6, day 12, day 14 data were copied to a new directory using a 
-# function I wrote called filter.by.N2
+# Some time points for N2 were skipped because they had less than 50 cells. I
+# wrote a function to find which tissue directories had all four data sets for
+# N2 and copy them to a new directory.
 
 # Create a directory where the files for the tissues with all 4 time points for 
 # N2 will be copied to 
