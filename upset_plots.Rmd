@@ -1,0 +1,268 @@
+---
+title: "Upset Plots"
+author: "Aaron Mohammed"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+
+library(UpSetR)
+
+main_path <- c('Predictions_using_wild_type_models')
+
+```
+
+```{r}
+
+tissuez <- c("Neuron", "Vulva_uterus", "Pharynx", "Hypodermis", "Muscle", 
+             "Germline", "Intestine")
+
+```
+
+```{r}
+
+filter.gene.coef <- function (tissue) {
+  
+  tissue_dir <- file.path(main_path, tissue)
+  dir <- file.path(main_path, tissue, "gene_corr")
+  dir.create(dir)
+  
+  N2_dir <- file.path(dir, "N2")
+  LIPL4_dir <- file.path(dir, "LIPL4")
+  DAF2_dir <- file.path(dir, "DAF2")
+  RSKS1_dir <- file.path(dir, "RSKS1")
+  BW_dir <- file.path(dir, "BW")
+  DLON_dir <- file.path(dir, "DLON")
+  
+  dirz <- c(N2_dir, LIPL4_dir, DAF2_dir, RSKS1_dir, BW_dir, DLON_dir)
+  for (i in 1:length(dirz)) {dir.create(dirz[i])}
+  
+  files <- dir(tissue_dir, "gene_coef")
+  
+  for (i in 1:length(files)) {
+    
+    file_name <- files[i]
+    geno <- gsub("gene_coef_","",file_name)
+    geno <- gsub(".csv","",geno)
+    
+    read.csv(file.path(tissue_dir, file_name)) -> gene_coef
+    
+    gene_coef_nonzeros <- gene_coef[gene_coef$value != 0,]
+    gene_coef_nonzeros <- gene_coef_nonzeros[,2:3]
+    
+    gene_coef_neg <- gene_coef_nonzeros[gene_coef_nonzeros$value < 0, ]
+    gene_coef_pos <- gene_coef_nonzeros[gene_coef_nonzeros$value > 0, ]
+    
+    rownames(gene_coef_neg) <- NULL
+    rownames(gene_coef_pos) <- NULL
+    
+    write.csv(gene_coef_neg, file.path(dir, geno, 'neg.csv'))
+    write.csv(gene_coef_pos, file.path(dir, geno, 'pos.csv'))
+  
+  }
+
+}
+
+```
+
+```{r}
+
+for (i in 1:length(tissuez)) {
+filter.gene.coef(tissuez[i])
+}
+
+```
+
+```{r}
+
+# Negative correlation
+
+dir <- file.path(main_path, tissuez[1], "gene_corr")
+geno <- list.dirs(dir, full.names= FALSE)
+geno <- geno[2:length(geno)]
+neg <- vector(mode = "list", length(geno))
+names(neg) <- geno
+
+get.neg <- function (geno, tissue) {
+  tissue_dir <- file.path(main_path, tissue)
+  geno_dir <- file.path(tissue_dir, "gene_corr", geno)
+  neg_coef <- read.csv(file.path(geno_dir, 'neg.csv'))
+  neg_coef <- neg_coef[,2]
+  return(neg_coef)
+}
+
+for (i in 1:length(geno)) {
+  for (j in 1:length(tissuez)) {
+    neg[[i]][[j]] <- get.neg(geno[i],tissuez[j])
+  }
+  names(neg[[i]]) <- tissuez
+}
+
+neg -> neg1
+  
+for (i in 1:length(geno)) {
+  for (j in 1:length(tissuez)) {
+  neg1[[i]][[j]] <- c(neg1[[i]][[j]], rep(NA,max(lengths(neg1[[i]]))-length(neg1[[i]][[j]])))
+  }
+}
+
+upset_path <- file.path(main_path, "upset")
+dir.create(upset_path)
+
+for (i in 1:length(geno)) {
+  neg_df <- as.data.frame(do.call(cbind, neg1[[i]]))
+  unlisted <- unlist(neg_df)
+  occurences <- as.data.frame(table(unlisted))
+  occurences <- occurences[order(occurences$Freq, decreasing=TRUE),]
+  row.names(occurences) <- NULL
+  file_name <- paste0("neg_freq", sep= "_", geno[i], sep= ".", "csv")
+  write.csv(occurences,file.path(upset_path, file_name))
+}
+
+for (i in 1:length(geno)) {
+  file_name <- paste0("neg_upset", sep= "_", geno[i], sep= ".", "pdf")
+  pdf(file.path(upset_path, file_name), width = 9, height = 5, bg = "white")
+  print(upset(fromList(neg[[i]]), nsets = length(tissuez), order.by = "degree", 
+        text.scale = c(1.5, 1.1, 1.1,1.1, 1.1, 1.1), nintersects = NA))
+  dev.off()
+}
+
+# # N2
+# for (i in 5) {
+#   file_name <- paste0("neg_upset", sep= "_", geno[i], sep= "_", "figure_50", sep= ".", "pdf")
+#   pdf(file.path(upset_path, file_name), width = 9, height = 5, bg = "white")
+#   print(upset(fromList(neg[[i]]), nsets = length(tissuez), order.by = "degree",
+#         text.scale = c(1.5, 1.1, 1.1,1.1, 1.1, 1.1), mainbar.y.max= 50))
+#   dev.off()
+# }
+
+```
+
+```{r}
+
+
+# Positive correlation 
+
+dir <- file.path(main_path, tissuez[1], "gene_corr")
+geno <- list.dirs(dir, full.names= FALSE)
+geno <- geno[2:length(geno)]
+pos <- vector(mode = "list", length(geno))
+names(pos) <- geno
+
+get.pos <- function (geno, tissue) {
+  tissue_dir <- file.path(main_path, tissue)
+  geno_dir <- file.path(tissue_dir, "gene_corr", geno)
+  pos_coef <- read.csv(file.path(geno_dir, 'pos.csv'))
+  pos_coef <- pos_coef[,2]
+  return(pos_coef)
+}
+
+for (i in 1:length(geno)) {
+  for (j in 1:length(tissuez)) {
+    pos[[i]][[j]] <- get.pos(geno[i],tissuez[j])
+  }
+  names(pos[[i]]) <- tissuez
+}
+
+pos -> pos1
+  
+for (i in 1:length(geno)) {
+  for (j in 1:length(tissuez)) {
+  pos1[[i]][[j]] <- c(pos1[[i]][[j]], rep(NA,max(lengths(pos1[[i]]))-length(pos1[[i]][[j]])))
+  }
+}
+
+upset_path <- file.path(main_path, "upset")
+dir.create(upset_path)
+
+for (i in 1:length(geno)) {
+  pos_df <- as.data.frame(do.call(cbind, pos1[[i]]))
+  unlisted <- unlist(pos_df)
+  occurences <- as.data.frame(table(unlisted))
+  occurences <- occurences[order(occurences$Freq, decreasing=TRUE),]
+  row.names(occurences) <- NULL
+  file_name <- paste0("pos_freq", sep= "_", geno[i], sep= ".", "csv")
+  write.csv(occurences,file.path(upset_path, file_name))
+}
+
+for (i in 1:length(geno)) {
+  file_name <- paste0("pos_upset", sep= "_", geno[i], sep= ".", "pdf")
+  pdf(file.path(upset_path, file_name), width = 9, height = 5, bg = "white")
+  print(upset(fromList(pos[[i]]), nsets = length(tissuez), order.by = "degree", 
+        text.scale = c(1.5, 1.1, 1.1,1.1, 1.1, 1.1), nintersects = NA))
+  dev.off()
+}
+
+# # N2
+# for (i in 5) {
+#   file_name <- paste0("pos_upset", sep= "_", geno[i], sep= "_", "figure_50", sep= ".", "pdf")
+#   pdf(file.path(upset_path, file_name), width = 9, height = 5, bg = "white")
+#   print(upset(fromList(pos[[i]]), nsets = length(tissuez), order.by = "degree",
+#         text.scale = c(1.5, 1.1, 1.1,1.1, 1.1, 1.1), mainbar.y.max= 50))
+#   dev.off()
+# }
+
+```
+
+```{r}
+
+both <- vector(mode = "list", length(geno))
+names(both) <- geno
+
+for (i in 1:length(geno)) {
+  for (j in 1:length(tissuez)) {
+    both[[i]][[j]] <- c(pos[[i]][[j]], neg[[i]][[j]])
+  }
+  names(both[[i]]) <- tissuez
+}
+
+both -> both1
+  
+for (i in 1:length(geno)) {
+  for (j in 1:length(tissuez)) {
+  both1[[i]][[j]] <- c(both1[[i]][[j]], rep(NA,max(lengths(both1[[i]]))-length(both1[[i]][[j]])))
+  }
+}
+
+upset_path <- file.path(main_path, "upset")
+dir.create(upset_path)
+
+for (i in 1:length(geno)) {
+  both_df <- as.data.frame(do.call(cbind, both1[[i]]))
+  unlisted <- unlist(both_df)
+  occurences <- as.data.frame(table(unlisted))
+  occurences <- occurences[order(occurences$Freq, decreasing=TRUE),]
+  row.names(occurences) <- NULL
+  file_name <- paste0("both_freq", sep= "_", geno[i], sep= ".", "csv")
+  write.csv(occurences,file.path(upset_path, file_name))
+}
+
+for (i in 1:length(geno)) {
+  file_name <- paste0("both_upset", sep= "_", geno[i], sep= ".", "pdf")
+  pdf(file.path(upset_path, file_name), width = 9, height = 5, bg = "white")
+  print(upset(fromList(both[[i]]), nsets = length(tissuez), order.by = "degree", 
+        text.scale = c(1.5, 1.1, 1.1,1.1, 1.1, 1.1), nintersects = NA))
+  dev.off()
+}
+
+
+# N2
+for (i in 5) {
+  file_name <- paste0("both_upset", sep= "_", geno[i], sep= "_", "figure", sep= ".", "pdf")
+  pdf(file.path(upset_path, file_name), width = 9, height = 5, bg = "white")
+  print(upset(fromList(both[[i]]), nsets = length(tissuez), order.by = "degree",
+        text.scale = c(1.5, 1.1, 1.1,1.1, 1.1, 1.1), nintersects = 63, point.size = 1.5))
+  dev.off()
+}
+
+# for (i in 5) {
+#   file_name <- paste0("both_upset", sep= "_", geno[i], sep= "_", "figure_50", sep= ".", "pdf")
+#   pdf(file.path(upset_path, file_name), width = 9, height = 5, bg = "white")
+#   print(upset(fromList(both[[i]]), nsets = length(tissuez), order.by = "degree",
+#         text.scale = c(1.5, 1.1, 1.1,1.1, 1.1, 1.1), mainbar.y.max= 50))
+#   dev.off()
+# }
+
+
+```
+

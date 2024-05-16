@@ -1,516 +1,168 @@
 ---
-title: "bootstrap_function"
+title: "Bootstraping"
 author: "Aaron Mohammed"
-date: '2022-10-03'
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
+
+main_path <- c('/Users/asm/Documents/git_for_jobs')
+bootstrap_path <- file.path(main_path, "bootstrap")
+dir.create(bootstrap_path)
+
+raw_data_path <- c('/Users/asm/Creighton/celegan/worm_20221014.rds')
+
+```
+
+```{r, warning = FALSE, message = FALSE}
 
 library(Seurat)
 library(SingleCellExperiment)
 library(R.utils)
 
-main_path <- c('/Users/asm/Creighton/celegan/New_scripts/Bootstrap')
-raw_data_path <- c('/Users/asm/Creighton/celegan/New_scripts/worm_20221014.rds')
-
-```
-
-```{r}
-
 readRDS(raw_data_path) -> seurat_data
-Idents(seurat_data)<-"tissue"
-
-```
-
-```{r}
-
-main_tissues <- table(seurat_data[[]]$tissue)
-tissuez <- names(main_tissues)
-
-```
-
-```{r}
-
-bootstrap.cells <- function (tissue) {
-  
-dir.create(file.path(main_path,tissue))
-# setwd(file.path(main_path, tissue))
-  
-tissue_path <- file.path(main_path, tissue)
 
 Idents(seurat_data)<-"tissue"
-subset(seurat_data,idents = tissue)->tissue_subset
-Idents(tissue_subset)<-"orig.ident"
-
-## N2 ##
-
-subset(tissue_subset,idents =c("N2D1", "N2D1R", "N2OPD1", "N2D6", "N2D12", "N2D14"))->N2_tissue_subset
-
-subset(N2_tissue_subset,idents =c("N2D1", "N2D1R", "N2OPD1"))->tmp
-data.frame(t(as.matrix(GetAssayData(object = tmp, slot = "counts"))))->tmp2
-cbind(day = 1, tmp2)->N2_dataout
-
-subset(N2_tissue_subset,idents =c( "N2D6"))->tmp
-data.frame(t(as.matrix(GetAssayData(object = tmp, slot = "counts"))))->tmp2
-cbind(day = 6, tmp2)->tmp2
-N2_dataout<-rbind(N2_dataout,tmp2)
-
-subset(N2_tissue_subset,idents =c( "N2D12"))->tmp
-data.frame(t(as.matrix(GetAssayData(object = tmp, slot = "counts"))))->tmp2
-cbind(day = 12, tmp2)->tmp2
-N2_dataout<-rbind(N2_dataout,tmp2)
-
-subset(N2_tissue_subset,idents =c( "N2D14"))->tmp
-data.frame(t(as.matrix(GetAssayData(object = tmp, slot = "counts"))))->tmp2
-cbind(day = 14, tmp2)->tmp2
-N2_dataout<-rbind(N2_dataout,tmp2)
-
-# N2 Day 1
-
-subset(N2_tissue_subset,idents =c("N2D1","N2D1R","N2OPD1"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) { 
-
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-
-write.csv(Day,file.path(tissue_path,"N2_Day_1.csv"))
-
-}
-
-# N2 Day 6
-  
-subset(N2_tissue_subset,idents =c( "N2D6"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"N2_Day_6.csv"))
-}
-
-# N2 Day 12
-subset(N2_tissue_subset,idents =c( "N2D12"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"N2_Day_12.csv"))
-}
-
-# N2 Day 14
-subset(N2_tissue_subset,idents =c( "N2D14"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"N2_Day_14.csv"))
-}
-
-## BW ##
-
-subset(tissue_subset,idents =c("BWD1","BWD6"))->BW_tissue_subset
-
-subset(BW_tissue_subset,idents =c("BWD1"))->tmp
-data.frame(t(as.matrix(GetAssayData(object = tmp, slot = "counts"))))->tmp2
-cbind(day = 1, tmp2)->BW_dataout
-
-subset(BW_tissue_subset,idents =c("BWD6"))->tmp
-data.frame(t(as.matrix(GetAssayData(object = tmp, slot = "counts"))))->tmp2
-cbind(day = 6, tmp2)->tmp2
-BW_dataout<-rbind(BW_dataout,tmp2)
-
-# BW Day 1
-
-subset(BW_tissue_subset,idents =c("BWD1"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) { 
-
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-
-write.csv(Day,file.path(tissue_path,"BW_Day_1.csv"))
-
-}
-
-# BW Day 6
-  
-subset(BW_tissue_subset,idents =c( "BWD6"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"BW_Day_6.csv"))
-}
-
-
-## Longevity ##
-
-#LIPL4 Day 1
-subset(tissue_subset,idents =c( "LIPL4D1"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"LIPL4_Day_1.csv"))
-}
-
-#LIPL4 Day 6
-subset(tissue_subset,idents =c( "LIPL4D6"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"LIPL4_Day_6.csv"))
-}
-
-# DAF2 Day 1
-subset(tissue_subset,idents =c( "DAF2D1"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"DAF2_Day_1.csv"))
-}
-
-
-# DAF2 Day 6
-subset(tissue_subset,idents =c( "DAF2D6"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"DAF2_Day_6.csv"))
-}
-
-# RSKS1 Day 1
-subset(tissue_subset,idents =c( "RSKS1D1"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"RSKS1_Day_1.csv"))
-}
-
-# RSKS1 Day 6
-subset(tissue_subset,idents =c( "RSKS1D6"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"RSKS1_Day_6.csv"))
-}
-
-# DLON Day 1
-subset(tissue_subset,idents =c( "DLOND1"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"DLON_Day_1.csv"))
-}
-
-# DLON Day 6
-subset(tissue_subset,idents =c( "DLOND6"))->seurat
-counts <- seurat@assays$RNA@counts 
-metadata <- seurat@meta.data
-sce <- SingleCellExperiment(assays = list(counts = counts), 
-                            colData = metadata)
-groups <- colData(sce)[, c("genotype")]
-
-if (length(groups) >= 50) {  
-  
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-data.frame(a1=pb2['pos',])->Day
-
-for (i in 1:100){ 
-group1<-rep('neg',length(groups))
-group1[sample(c(1:length(groups)),size=15, replace=FALSE)]<-'pos'
-pb2 <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
-                       groupings = group1, fun = "sum") 
-cbind(Day,pb2['pos',])->Day
-}
-write.csv(Day,file.path(tissue_path,"DLON_Day_6.csv"))
-}
-
-}
-
-
+tissuez <- names(table(seurat_data[[]]$tissue))
+
+genotypez <- list(c("N2D1","N2D1R","N2OPD1"),
+                  "N2D6","N2D12","N2D14",
+                  "LIPL4D6","DAF2D6","RSKS1D6")
 
 ```
 
-```{r}
+```{r, echo=TRUE, warning = FALSE, message = FALSE}
 
-for(i in 1:length(tissuez)) {
-bootstrap.cells(tissuez[i])
-}
-
-```
-
-```{r}
-
-N2_file_names <- c("N2_Day_1.csv", "N2_Day_6.csv", "N2_Day_12.csv", "N2_Day_14.csv")
-
-new_dir <- file.path(main_path,c("_tissues_with_3_N2_timepoints"))
-dir.create(new_dir)
-
-filter.by.N2 <- function (tissue) {
-  contents <- dir(file.path(main_path, tissue),pattern = "N2")
-  l <- length(contents)
-  # test <- N2_file_names %in% contents
-  # all_N2 <- all(test == TRUE)
-  if (l >= 3) {
-    # if (file.exists(file.path(new_dir,tissue)) == FALSE) {
-      new_tissue_dir <- file.path(new_dir,tissue)
-      copyDirectory(file.path(main_path, tissue), new_tissue_dir)
-    # }
+for (t in tissuez) {
+  
+  # Create a folder for each tissue
+  dir.create(file.path(bootstrap_path,t))
+  tissue_path <- file.path(bootstrap_path, t)
+  
+  # Subset the tissue 
+  Idents(seurat_data) <- "tissue"
+  subset(seurat_data,idents = t) -> tissue_subset
+  Idents(tissue_subset) <- "orig.ident"
+  
+  for (g in genotypez) {
+    # Subset genotype
+    tmp <- subset(tissue_subset, idents = g)
+    
+    # Extract count data from genotype subset
+    counts <- tmp@assays$RNA@counts 
+    metadata <- tmp@meta.data
+    sce <- SingleCellExperiment(assays = list(counts = counts), 
+                                colData = metadata)
+    cells <- colData(sce)[, c("genotype")]
+  
+    # For statistical significance, skip if there are less than 50 cells
+    if (length(cells) >= 50) { 
+      
+      # Create a character vector that will be used for labeling cells
+      # This vector has the same length as the number of cells
+      labels <- rep('neg',length(cells))
+      
+      # Randomly change 15 labels in the vector from neg to pos
+      'pos' -> labels[sample(c(1:length(cells)),
+                             size=15, 
+                             replace=FALSE)]
+      
+      # Aggregate the count matrix according to the labels
+      samp <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
+                                              groupings = labels,
+                                              fun = "sum") 
+      
+      # Extract the aggregated counts for the cells that were labeled as pos and
+      # store in a data frame called Day
+      Day <- data.frame(samp = samp['pos',])
+      
+      # Repeat the same steps 100 more times and each time append the result to
+      # the Day data frame
+      for (i in 1:100){ 
+        
+        labels <- rep('neg',length(cells))
+        'pos' -> labels[sample(c(1:length(cells)),
+                               size=15,
+                               replace=FALSE)]
+        samp <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
+                                                   groupings = labels, 
+                                                   fun = "sum") 
+        Day <- cbind(Day,samp['pos',])
+      }
+      
+        # Save the Day data frame as a csv file in the tissue directory
+        if (length(g) == 3) {
+          write.csv(Day, file.path(tissue_path, "N2D1.csv"))
+        } else {
+          write.csv(Day, file.path(tissue_path, 
+                                   paste0(g, ".csv")))
+        }
+    }
   }
 }
-  
+
 ```
 
-```{r}
+```{r, echo=TRUE, warning = FALSE, message = FALSE}
 
-for (i in 1:length(tissuez)) {
-filter.by.N2(tissuez[i])
+# Here is an example of what one of the data frames looks like. What's displayed
+# is the first 10 genes and first 5 columns of aggregated counts. Each data 
+# frame has 26208 rows and 101 columns
+
+tissue_path <- file.path(bootstrap_path, "Neuron")
+
+N2D1 <- read.csv(file.path(tissue_path, "N2D1.csv"), row.names = 1)
+N2D1[1:10, 1:4]
+
+```
+
+```{r, echo=TRUE, warning = FALSE, message = FALSE}
+
+# Some time points for N2 were skipped because they had less than 50 cells. I
+# wrote a function to find which tissue directories had all four data sets for
+# N2 and copy them to a new directory.
+
+# Create a directory where the files for the tissues with all 4 time points for 
+# N2 will be copied to 
+all_timepoints_dir <- file.path(bootstrap_path,c("tissues_w_all_N2_timepoints"))
+dir.create(all_timepoints_dir)
+
+# Filtering function
+filter.by.N2 <- function (tissue) {
+  
+  # List the files in that contain 'N2' in their name within the tissue 
+  # directory being evaluated
+  contents <- dir(file.path(bootstrap_path, tissue),pattern = "N2")
+  
+  # Determine the number of files that contain 'N2' in their name and store that
+  # number in a variable called l 
+  l <- length(contents)
+
+  # If l is equal to 4, copy the tissue directory being evaluated to the
+  # 'tissues_with_all_N2_timepoints' directory
+  if (l == 4) {
+    new_tissue_dir <- file.path(all_timepoints_dir, 
+                                tissue)
+    
+    copyDirectory(file.path(bootstrap_path, tissue), 
+                  new_tissue_dir)
+  }
 }
 
 ```
 
+```{r, echo=TRUE, warning = FALSE, message = FALSE}
+  
+# Run the filtering function
+for (i in 1:length(tissuez)) {
+  filter.by.N2(tissuez[i])
+}
 
+# These were the tissues with all 4 time points for N2
+tissuez <- list.dirs(all_timepoints_dir,
+                     full.names=FALSE, 
+                     recursive= FALSE)
 
+tissuez
 
-
-
-
-
-
-
-
-
-
-
-
-
+```

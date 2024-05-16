@@ -1,8 +1,7 @@
 ---
-title: "circos"
+title: "Circos Plots"
 author: "Aaron Mohammed"
-date: "2022-10-27"
-output: html_document
+output: github_document
 ---
 
 ```{r}

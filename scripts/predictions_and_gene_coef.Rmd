@@ -1,8 +1,7 @@
 ---
-title: "Predictions_and_gene_coef"
+title: "Age Clocks & Predictions"
 author: "Aaron Mohammed"
-date: "2022-10-25"
-output: html_document
+output: github_document
 ---
 
 ```{r}

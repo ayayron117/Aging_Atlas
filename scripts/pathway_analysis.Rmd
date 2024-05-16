@@ -1,8 +1,7 @@
 ---
-title: "pathway analysis"
+title: "Pathway Analysis"
 author: "Aaron Mohammed"
-date: "2022-12-07"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}

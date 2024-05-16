@@ -1,8 +1,7 @@
 ---
-title: 'Modules and correlations'
+title: 'Modules and Correlations'
 author: 'Aaron Mohammed'
-date: '2022-11-03'
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
