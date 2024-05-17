@@ -20,6 +20,8 @@ library(Seurat)
 library(SingleCellExperiment)
 library(R.utils)
 
+set.seed(123)
+
 readRDS(raw_data_path) -> seurat_data
 
 Idents(seurat_data)<-"tissue"
@@ -68,26 +70,26 @@ for (t in tissuez) {
                              replace=FALSE)]
       
       # Aggregate the count matrix according to the labels
-      samp <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
+      S <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
                                               groupings = labels,
                                               fun = "sum") 
       
       # Extract the aggregated counts for the cells that were labeled as pos and
       # store in a data frame called Day
-      Day <- data.frame(samp = samp['pos',])
+      Day <- data.frame(S = S['pos',])
       
       # Repeat the same steps 100 more times and each time append the result to
       # the Day data frame
-      for (i in 1:100){ 
+      for (i in 1:99){ 
         
         labels <- rep('neg',length(cells))
         'pos' -> labels[sample(c(1:length(cells)),
                                size=15,
                                replace=FALSE)]
-        samp <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
+        S <- Matrix.utils:::aggregate.Matrix(t(counts(sce)), 
                                                    groupings = labels, 
                                                    fun = "sum") 
-        Day <- cbind(Day,samp['pos',])
+        Day <- cbind(Day,S['pos',])
       }
       
         # Save the Day data frame as a csv file in the tissue directory
