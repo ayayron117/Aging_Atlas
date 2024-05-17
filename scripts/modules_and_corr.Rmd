@@ -29,7 +29,8 @@ seurat_data <- readRDS(file = '/Users/asm/Creighton/celegan/worm_20221014.rds')
 
 ```{r}
 
-main_path <- ('/Users/asm/Creighton/celegan/Modules')
+main_path <- ('/Users/asm/Documents/git_for_jobs/Modules')
+dir.create(main_path)
 
 # List the tissue directories that will be analyzed. This is just to get their names.
 tissuez <- list.dirs('/Users/asm/Creighton/celegan/Bootstrap/_tissues_with_3_N2_timepoints',
@@ -532,7 +533,7 @@ modules.correlations.func <- function (tissue_name) {
 
 ```{r}
 
-for (i in 4:length(tissuez)) {modules.correlations.func(tissuez[i])}
+for (i in 1:length(tissuez)) {modules.correlations.func(tissuez[i])}
 
 ```
 
