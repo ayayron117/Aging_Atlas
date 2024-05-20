@@ -12,6 +12,8 @@ library(writexl)
 library(circlize)
 library(tidyr)
 
+# full_seurat <- readRDS(data_path)
+
 modules_path <- file.path(getwd(), "Modules")
 dir.create(modules_path)
 
@@ -26,32 +28,30 @@ tissuez <- c("Germline", "Hypodermis", "Intestine", "Muscle",
 
 ## WGCNA & Module Trait Correlation
 
-In this section, I wrote a function that does the following:  
-* Subsets the full seurat object by tissue  
-* Performs WGCNA on each genotype  
-* Calculates each gene module’s correlation with age  
-* Calculates the gene intersection sizes between the modules of each
-genotype
+Here, I wrote a function that does the following: \* Subsets the full
+seurat object by tissue \* Performs WGCNA on each genotype \* Calculates
+each gene module’s correlation with age \* Calculates the gene
+intersection sizes between the modules of each genotype
 
 ``` r
-modules.correlations.func <- function (tissue_name) {
+modules.correlations.func <- function (tissue) {
   
   ############################################################################
                                 # Subset Tissue
   ############################################################################
   
-  tissue_dir <- file.path(modules_path, tissue_name)
+  tissue_dir <- file.path(modules_path, tissue)
   dir.create(tissue_dir)
   
   # Strings that specify genotype and tissue
-  N2_t_name <- paste('N2',sep= '_', tissue_name)
-  LIPL4_t_name <- paste('LIPL4',sep= '_', tissue_name)
-  DAF2_t_name <- paste('DAF2',sep= '_', tissue_name)
-  RSKS1_t_name <- paste('RSKS1',sep= '_', tissue_name)
+  N2_t_name <- paste('N2',sep= '_', tissue)
+  LIPL4_t_name <- paste('LIPL4',sep= '_', tissue)
+  DAF2_t_name <- paste('DAF2',sep= '_', tissue)
+  RSKS1_t_name <- paste('RSKS1',sep= '_', tissue)
   
   # Subset the tissue
   Idents(full_seurat)<-'tissue'
-  T_sub <- subset(full_seurat,idents = tissue_name)
+  T_sub <- subset(full_seurat,idents = tissue)
   
   # Subset the samples
   Idents(T_sub) <- 'orig.ident'
@@ -78,7 +78,7 @@ modules.correlations.func <- function (tissue_name) {
   T_sub <- SetupForWGCNA(T_sub, 
                          gene_select = 'fraction', 
                          fraction = 0.05, 
-                         wgcna_name = tissue_name)
+                         wgcna_name = tissue)
   
   # Create metacells for each genotype
   T_sub <- MetacellsByGroups(seurat_obj = T_sub,
@@ -165,7 +165,7 @@ modules.correlations.func <- function (tissue_name) {
   
   # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
   age.corr <- function (seurat, ident = "geno", geno, traits,
-                        tissue_dir = tissue_dir, tissue_name = tissue_name) {
+                        tissue_dir = tissue_dir, tissue = tissue) {
     
     Idents(seurat)<- ident
     
@@ -193,7 +193,7 @@ modules.correlations.func <- function (tissue_name) {
     saveRDS(corr_pval, file.path(tissue_dir, 
                                  paste0('CP', sep= '_', 
                                         geno, sep= '_',
-                                        tissue_name, sep= '',
+                                        tissue, sep= '',
                                         '.RData')))    
     
   }
@@ -211,7 +211,7 @@ modules.correlations.func <- function (tissue_name) {
                      DAF2_CP$geno_color, RSKS1_CP$geno_color)
   
   ############################################################################
-                    # Test Gene Overlap Between Modules
+                      # Test Gene Overlap Between Modules
   ############################################################################
   
   # Extract the gene module data from each genotype
@@ -275,7 +275,7 @@ modules.correlations.func <- function (tissue_name) {
   # Add the names of the comparisons
   names(overlapz) <- namez
   
-  # 
+  # Place the results into a single data frame
   overlap <- as.data.frame(matrix(nrow= length(overlapz), ncol= 6))
   names(overlap) <- c('M1','M2','M1_size','M2_size','Intersection_size','pval')
   overlap_names <- names(overlapz)
@@ -294,7 +294,7 @@ modules.correlations.func <- function (tissue_name) {
   
   write.csv(overlap, 
             file.path(tissue_dir,
-                      paste(tissue_name, 
+                      paste(tissue, 
                             sep= '_', 'overlap.csv')))
   
   # Get the genes that are a part of each module
@@ -307,11 +307,11 @@ modules.correlations.func <- function (tissue_name) {
   names(genez) <- names(sig_modz_L)
   
   write_xlsx(genez, file.path(tissue_dir,
-                              paste(tissue_name, 
+                              paste(tissue, 
                                     sep= '_', 'gene_lists.xlsx')))
   
   # This is just for this markdown file to show an example of the result
-  if (tissue_name == "Neuron") {return(overlap)}
+  if (tissue == "Neuron") {return(overlap)}
   
 }
 ```
@@ -320,7 +320,8 @@ modules.correlations.func <- function (tissue_name) {
 for (i in 1:length(tissuez)) {modules.correlations.func(tissuez[i])}
 ```
 
-## Below is an example of the overlap results between the modules of each genotype for neurons:
+Below is an example of the overlap results between the modules of each
+genotype for neurons:
 
     ##                 M1              M2 M1_size M2_size Intersection_size
     ## 1        N2_yellow      LIPL4_blue     339     677               275
@@ -501,293 +502,302 @@ for (i in 1:length(tissuez)) {modules.correlations.func(tissuez[i])}
     ## 87  1.000000e+00
     ## 88  9.999787e-01
 
-# Circos Plots
+## Circos Plots
 
 ``` r
-# circos.plot <- function (tissue) {
-#   
-#   tissue_dir <- file.path(path_to_RData, tissue)
-#   
-#   overlap_file_name <- list.files(tissue_dir, pattern="overlap")
-#   overlap <- read.csv(file.path(tissue_dir, overlap_file_name))
-#   overlap <- overlap[,-1]
-#   
-#   CP_N2_file_name <- list.files(tissue_dir, pattern="CP_N2")
-#   CP_LIPL4_file_name <- list.files(tissue_dir, pattern="CP_LIPL4")
-#   CP_DAF2_file_name <- list.files(tissue_dir, pattern="CP_DAF2")
-#   CP_RSKS1_file_name <- list.files(tissue_dir, pattern="CP_RSKS1")
-#   
-#   CP_N2 <- readRDS(file= file.path(tissue_dir, CP_N2_file_name))
-#   CP_LIPL4 <- readRDS(file= file.path(tissue_dir, CP_LIPL4_file_name))
-#   CP_DAF2 <- readRDS(file= file.path(tissue_dir, CP_DAF2_file_name))
-#   CP_RSKS1 <- readRDS(file= file.path(tissue_dir, CP_RSKS1_file_name))
-#   
-#   CP_list <- list(CP_N2 , CP_LIPL4, CP_DAF2, CP_RSKS1)
-#   names(CP_list) <- c("N2","LIPL4","DAF2","RSKS1")
-#   
-#   ##############################################################################
-#   
-#   # Keep overlaps with pvalue < 0.05 
-#   filtered <- overlap[overlap$pval<0.05,]
-#   
-#   # Remove duplicate combinations (I did this based on pvalues. Duplicate combinations 
-#   # should have pvalues that are identical up to 3 significant figures)
-#   filtered <- filtered[!duplicated(signif(filtered$pval,3)), ] 
-#   
-#   connections <- filtered[,c(1,2,6)]
-#   
-#   ##############################################################################
-#   
-#   # Extract the sizes of each module. 
-#   geno_sizes <- overlap[,c(1,3)]
-#   geno_sizes2 <- overlap[,c(2,4)]
-#   
-#   # Duplicates are removed
-#   geno_sizes <- geno_sizes[!duplicated(geno_sizes),]
-#   geno_sizes2 <- geno_sizes2[!duplicated(geno_sizes2),]
-#   names(geno_sizes) <- c("module", "size")
-#   names(geno_sizes2) <- c("module", "size")
-#   geno_sizes <- rbind(geno_sizes,geno_sizes2)
-#   geno_sizes <- geno_sizes[!duplicated(geno_sizes),]
-#   
-#   # Separate the geno name and module names
-#   geno_module_sizes <- separate(data= geno_sizes, col= module, into= c("genotype", "module"), sep = "\\_")
-#   
-#   # Calculate the total number of genes for each genotype
-#   ngenes_genotype <- aggregate(geno_module_sizes$size, 
-#                                by=list(Category=geno_module_sizes$genotype), 
-#                                FUN=sum)
-#   names(ngenes_genotype) <- c("genotype", "size")
-#   
-#   # Calculate the genotype proportions, this will be used to set the sector sizes.
-#   ngenes_genotype$proportion <- proportions(ngenes_genotype$size)
-#   
-#   ##############################################################################
-#   
-#   # Extract total amount of genes per genotype and store it in the geno_module_sizes df
-#   geno_module_sizes$total_geno_size <- NA
-#   genoz <- ngenes_genotype$genotype
-#   
-#   for (i in 1:length(genoz)) {
-#     geno_module_sizes$total_geno_size[geno_module_sizes$genotype==genoz[i]] <- ngenes_genotype$size[ngenes_genotype$genotype==genoz[i]]
-#   }
-#   
-#   # Calculate proportions of each module by genotype
-#   geno_module_sizes$proportion <- NA
-#   geno_module_sizes$proportion <- geno_module_sizes$size/geno_module_sizes$total_geno_size
-#   
-#   # Convert geno_module_sizes to a list 
-#   split_tibble <- function(tibble, col = 'col') tibble %>% split(., .[, col])
-#   mod_list <- split_tibble(geno_module_sizes, 'genotype')
-#   
-#   # Sort proportions from greatest to least
-#   for (i in 1:length(genoz)) {
-#     mod_list[[genoz[i]]] <- mod_list[[genoz[i]]][order(mod_list[[genoz[i]]]$proportion, decreasing = TRUE), ]
-#   }
-#   
-#   # Each module will be represented by a box. To create these boxes, line segments are placed on each track where the right side of the box will be. To calculate the end positions, the ordered proportions are added sequentially. The end position of the first module will just be the value of its proportion. The end position of the second module will be the sum of its proportion with the end position of the first module. The end position of the third module will be the sum of its proportion with the end position of the second module. This continues until the end position of the last module is equal to 1.
-#   for (i in 1:length(genoz)) {
-#     mod_list[[genoz[i]]]$end_position[1] <- mod_list[[genoz[i]]]$proportion[1]
-#     n_modules <- nrow(mod_list[[genoz[i]]])
-#     x <- 2
-#     while (x <= n_modules) {
-#       mod_list[[genoz[i]]]$end_position[x] <- mod_list[[genoz[i]]]$proportion[x] + mod_list[[genoz[i]]]$end_position[x-1]
-#       x = x + 1
-#     }
-#   }
-#   
-#   # Combine geno name with module name
-#   for (i in 1:length(genoz)) {
-#     mod_list[[genoz[i]]]$geno_mod <- paste(mod_list[[genoz[i]]]$genotype, 
-#                                            mod_list[[genoz[i]]]$module, 
-#                                            sep= "_")
-#   }
-#   
-#   # Extract correlation values from CP_list and store in mod_list
-#   for (i in 1:length(genoz)) {
-#     for (j in 1:nrow(mod_list[[genoz[i]]])) {
-#       mod <- mod_list[[genoz[i]]]$geno_mod[j]
-#       mod_list[[genoz[i]]]$cor[j] <- CP_list[[genoz[i]]][mod,"cor"]
-#     }
-#   }
-# 
-#   ##############################################################################
-#                                   # Circos Plot
-#   ##############################################################################
-#   
-#   circos_file_name <- paste(tissue, sep= "_", 'circos_plot_reversed.pdf')
-#   
-#   pdf(file.path(plots_path, circos_file_name), width = 8, height = 8)
-#   
-#   geno_color <- c(2,3,4,6)
-#   circos.par("track.height" = 0.05, gap.after = c(5,5,5,5), cell.padding = c(0, 0, 0, 0))
-#   circos.initialize(genoz, xlim = c(0, 1),sector.width = ngenes_genotype$proportion)
-#   circos.track(ylim = c(0,1))
-#   circos.track(ylim = c(0,1),track.height =0.08)
-#   
-#   title(tissue)
-#   
-#   # Add line segments that split the modules of each genotype
-#   for (i in 1:length(genoz)) {
-#     for (j in 1:nrow(mod_list[[genoz[i]]])) {
-#       x <- mod_list[[genoz[i]]]$end_position[j]
-#       circos.segments(x,0,x,1, 
-#                       sector.index = genoz[i], 
-#                       track.index = 2)
-#     }
-#   }
-#   
-#   # Color the modules based on their correlation with aging
-#   for (i in 1:length(genoz)) {
-#     
-#     for (j in 1:nrow(mod_list[[genoz[i]]])) {
-#       xi <- mod_list[[genoz[i]]]$end_position[j-1]
-#       x <- mod_list[[genoz[i]]]$end_position[j]
-#       cor <- mod_list[[genoz[i]]]$cor[j]
-#       
-#       if (cor > 0) {color = "green"}
-#       if (cor < 0) {color = "blue"}
-#       
-#       if (j == 1) {
-#         circos.rect(0, 0, x, 1, 
-#                     col= color, 
-#                     sector.index = genoz[i], 
-#                     track.index = 2)
-#       }
-#       else {
-#         circos.rect(xi, 0, x, 1, 
-#                     col= color, 
-#                     sector.index = genoz[i], 
-#                     track.index = 2)
-#       }
-#     }
-#   }
-#   
-#   # Add the links between modules
-#   transp <- 0.8
-#   
-#   skip_these <- data.frame(matrix(nrow=1,ncol=2))
-#   names(skip_these) <- c("M1","M2")
-#   
-#   for (geno in genoz) {
-#     
-#     modulez <- connections[grep(geno, connections$M1) ,]
-#     modulez <- rbind(modulez, connections[grep(geno, connections$M2) ,])
-#     modulez[grep(geno, modulez$M2), c("M2","M1")] <- modulez[grep(geno, modulez$M2), c("M1","M2")]
-#     
-#     
-#     t <- table(modulez$M1)
-#     dup_1 <- names(which(t[]>1)) 
-#   
-#     if (!identical(dup_1, character(0))) {
-#       for (i in 1:length(dup_1)) {
-#         loc <- grep(dup_1[i], modulez$M1)
-#         modulez <- separate(data= modulez, col= M2, into= c("genotype", "module"), sep = "\\_")
-#         dummy_mod_1 <- data.frame(matrix(nrow= nrow(modulez), ncol= ncol(modulez)))
-#         dummy_mod_1[loc,] <- modulez[loc,]
-#         t <- table(dummy_mod_1[,2])
-#         dup_g <- names(which(t[]>1)) 
-#         
-#         if (!identical(dup_g, character(0))) {
-#           for (j in 1:length(dup_g)) {
-#             loc <- which(dummy_mod_1[,2] == dup_g[j])
-#             dummy_mod_2 <- c(rep(NA,nrow(modulez)))
-#             dummy_mod_2[loc] <- modulez$pval[loc]
-#             loc_min <- which.min(dummy_mod_2)
-#             loc_remove <- loc[loc != loc_min]
-#             modulez <- modulez[-loc_remove,]
-#           }
-#         }
-#         modulez <- modulez %>% unite("M2", genotype:module, sep= "_", remove= TRUE)
-#       }
-#     }
-#     
-#     
-#     t <- table(modulez$M2)
-#     dup_2 <- names(which(t[]>1)) 
-#   
-#     if (!identical(dup_2, character(0))) {
-#       for (i in 1:length(dup_2)) {
-#         loc <- grep(dup_2[i], modulez$M2)
-#         dummy_mod <- c(rep(NA,nrow(modulez)))
-#         dummy_mod[loc] <- modulez$pval[loc]
-#         loc_min <- which.min(dummy_mod)
-#         loc_remove <- loc[loc != loc_min]
-#         modulez <- modulez[-loc_remove,]
-#       }}
-#     
-#     
-#     
-#     for (i in 1:nrow(modulez)) {
-#       M1 <- modulez$M1[i]
-#       M2 <- modulez$M2[i]
-#       
-#       test1 <- which(skip_these$M1 == M1 & skip_these$M2 == M2)
-#       test2 <- which(skip_these$M1 == M2 & skip_these$M2 == M1)
-#       
-#       if (!identical(test1,integer(0)) | !identical(test2,integer(0))) next
-#       
-#       geno1 <- gsub("_.*","",M1)
-#       geno2 <- gsub("_.*","",M2)
-#       
-#       loc_a <- which(mod_list[[geno1]]$geno_mod == M1)
-#       loc_b <- which(mod_list[[geno2]]$geno_mod == M2)
-#       
-#       if (loc_a == 1) {
-#         M1_i <- 0
-#         M1_f <- mod_list[[geno1]][mod_list[[geno1]]$geno_mod == M1,"end_position"]}
-#       
-#       if (loc_a > 1) {
-#         M1_i <- mod_list[[geno1]][loc_a-1,"end_position"]
-#         M1_f <- mod_list[[geno1]][mod_list[[geno1]]$geno_mod == M1,"end_position"]}
-#       
-#       if (loc_b == 1) {
-#         M2_i <- 0
-#         M2_f <- mod_list[[geno2]][mod_list[[geno2]]$geno_mod == M2,"end_position"]}
-#       
-#       if (loc_b > 1) {
-#         M2_i <- mod_list[[geno2]][loc_b-1,"end_position"]
-#         M2_f <- mod_list[[geno2]][mod_list[[geno2]]$geno_mod == M2,"end_position"]}
-#       
-#       M1_cor <- mod_list[[geno1]][mod_list[[geno1]]$geno_mod == M1,"cor"]
-#       M2_cor <- mod_list[[geno2]][mod_list[[geno2]]$geno_mod == M2,"cor"]
-#       
-#       if (M1_cor > 0 & M2_cor > 0) {color = "green"}
-#       if (M1_cor < 0 & M2_cor < 0) {color = "blue"}
-#       if (M1_cor > 0 & M2_cor < 0) {color = "red"}
-#       if (M1_cor < 0 & M2_cor > 0) {color = "red"}
-#         
-#       circos.link(geno1, c(M1_i, M1_f), 
-#                   geno2, c(M2_i, M2_f), 
-#                   col=add_transparency(color, transp)) 
-#     }
-#     
-#     skip_these <- rbind(skip_these, modulez[,1:2])
-#     skip_these <- na.omit(skip_these)
-#   }
-#   
-#   
-#   # Highlight the genotypes
-#   for(i in 1:length(genoz)) {
-#     highlight.sector(sector.index = genoz[i], 
-#                      track.index = 1, 
-#                      col = geno_color[i], 
-#                      text = genoz[i], 
-#                      text.vjust = -2, 
-#                      niceFacing = TRUE)
-#   }
-#   
-#   circos.clear()
-#   
-#   dev.off()
-# 
-# }
+circos.plot <- function (tissue) {
+
+  tissue_dir <- file.path(modules_path, tissue)
+
+  overlap_file_name <- list.files(tissue_dir, pattern="overlap")
+  overlap <- read.csv(file.path(tissue_dir, overlap_file_name))[,-1]
+
+  CP_N2_file_name <- list.files(tissue_dir, pattern="CP_N2")
+  CP_LIPL4_file_name <- list.files(tissue_dir, pattern="CP_LIPL4")
+  CP_DAF2_file_name <- list.files(tissue_dir, pattern="CP_DAF2")
+  CP_RSKS1_file_name <- list.files(tissue_dir, pattern="CP_RSKS1")
+
+  CP_N2 <- readRDS(file= file.path(tissue_dir, CP_N2_file_name))
+  CP_LIPL4 <- readRDS(file= file.path(tissue_dir, CP_LIPL4_file_name))
+  CP_DAF2 <- readRDS(file= file.path(tissue_dir, CP_DAF2_file_name))
+  CP_RSKS1 <- readRDS(file= file.path(tissue_dir, CP_RSKS1_file_name))
+
+  CP_list <- list(CP_N2 , CP_LIPL4, CP_DAF2, CP_RSKS1)
+  names(CP_list) <- c("N2","LIPL4","DAF2","RSKS1")
+
+  # Keep overlaps with pvalue < 0.05
+  filtered <- overlap[overlap$pval<0.05,]
+
+  # Remove duplicate combinations (I did this based on pvalues. Duplicated 
+  # combinations would have p-values that are identical)
+  filtered <- filtered[!duplicated(signif(filtered$pval, 5)), ]
+  
+  
+  connections <- filtered[,c(1,2,6)]
+
+  # Extract the sizes of each module.
+  M1_sizes <- overlap[,c(1,3)]
+  M2_sizes <- overlap[,c(2,4)]
+
+  # Duplicates are removed
+  M1_sizes <- M1_sizes[!duplicated(M1_sizes),]
+  M2_sizes <- M2_sizes[!duplicated(M2_sizes),]
+  names(M1_sizes) <- c("module", "size")
+  names(M2_sizes) <- c("module", "size")
+  mod_sizes <- rbind(M2_sizes,M2_sizes)
+  mod_sizes <- mod_sizes[!duplicated(mod_sizes),]
+
+  # Separate the geno name and module names
+  geno_module_sizes <- separate(data= mod_sizes, col= module, into= c("genotype", "module"), sep = "\\_")
+
+  # Calculate the total number of genes for each genotype
+  ngenes_genotype <- aggregate(geno_module_sizes$size,
+                               by=list(Category=geno_module_sizes$genotype),
+                               FUN=sum)
+  names(ngenes_genotype) <- c("genotype", "size")
+
+  # Calculate the genotype proportions, this will be used to set the sector sizes.
+  ngenes_genotype$proportion <- proportions(ngenes_genotype$size)
+
+  ##############################################################################
+
+  # Extract total amount of genes per genotype and store it in the 
+  # geno_module_sizes data frame
+  geno_module_sizes$total_geno_size <- NA
+  genoz <- ngenes_genotype$genotype
+
+  for (i in 1:length(genoz)) {
+    geno_module_sizes$total_geno_size[geno_module_sizes$genotype==genoz[i]] <- ngenes_genotype$size[ngenes_genotype$genotype==genoz[i]]
+  }
+
+  # Calculate proportions of each module by genotype
+  geno_module_sizes$proportion <- NA
+  geno_module_sizes$proportion <- geno_module_sizes$size/geno_module_sizes$total_geno_size
+
+  # Convert geno_module_sizes to a list
+  split_tibble <- function(tibble, col = 'col') tibble %>% split(., .[, col])
+  mod_list <- split_tibble(geno_module_sizes, 'genotype')
+
+  # Sort proportions from greatest to least
+  for (i in 1:length(genoz)) {
+    mod_list[[genoz[i]]] <- mod_list[[genoz[i]]][order(mod_list[[genoz[i]]]$proportion, decreasing = TRUE), ]
+  }
+
+  # Each module will be represented by a box. To create these boxes, line segments are placed on each track where the right side of the box will be. To calculate the end positions, the ordered proportions are added sequentially. The end position of the first module will just be the value of its proportion. The end position of the second module will be the sum of its proportion with the end position of the first module. The end position of the third module will be the sum of its proportion with the end position of the second module. This continues until the end position of the last module is equal to 1. 
+  for (i in 1:length(genoz)) {
+    mod_list[[genoz[i]]]$end_position[1] <- mod_list[[genoz[i]]]$proportion[1]
+    n_modules <- nrow(mod_list[[genoz[i]]])
+    x <- 2
+    while (x <= n_modules) {
+      mod_list[[genoz[i]]]$end_position[x] <- mod_list[[genoz[i]]]$proportion[x] + mod_list[[genoz[i]]]$end_position[x-1]
+      x = x + 1
+    }
+  }
+
+  # Combine geno name with module name
+  for (i in 1:length(genoz)) {
+    mod_list[[genoz[i]]]$geno_mod <- paste(mod_list[[genoz[i]]]$genotype,
+                                           mod_list[[genoz[i]]]$module,
+                                           sep= "_")
+  }
+
+  # Extract correlation values from CP_list and store in mod_list
+  for (i in 1:length(genoz)) {
+    for (j in 1:nrow(mod_list[[genoz[i]]])) {
+      mod <- mod_list[[genoz[i]]]$geno_mod[j]
+      mod_list[[genoz[i]]]$cor[j] <- CP_list[[genoz[i]]][mod,"cor"]
+    }
+  }
+
+  ##############################################################################
+                                  # Circos Plot
+  ##############################################################################
+
+  circos_file_name <- paste(tissue, "circos_plot.pdf", sep = "_")
+  plot_path <- file.path(plots_path, circos_file_name)
+
+  pdf(plot_path, width = 8, height = 8)
+  
+    geno_color <- c(2,3,4,6)
+    
+    circos.par("track.height" = 0.05, 
+               gap.after = c(5,5,5,5), 
+               cell.padding = c(0, 0, 0, 0))
+    
+    circos.initialize(genoz, 
+                      xlim = c(0, 1),
+                      sector.width = ngenes_genotype$proportion)
+    
+    circos.track(ylim = c(0,1))
+    circos.track(ylim = c(0,1),track.height =0.08)
+  
+    title(tissue)
+  
+    # Add line segments that split the modules of each genotype
+    for (i in 1:length(genoz)) {
+      for (j in 1:nrow(mod_list[[genoz[i]]])) {
+        x <- mod_list[[genoz[i]]]$end_position[j]
+        circos.segments(x,0,x,1,
+                        sector.index = genoz[i],
+                        track.index = 2)
+      }
+    }
+  
+    # Color the modules based on their correlation with aging
+    for (i in 1:length(genoz)) {
+  
+      for (j in 1:nrow(mod_list[[genoz[i]]])) {
+        xi <- mod_list[[genoz[i]]]$end_position[j-1]
+        x <- mod_list[[genoz[i]]]$end_position[j]
+        cor <- mod_list[[genoz[i]]]$cor[j]
+  
+        if (cor > 0) {color = "green"}
+        if (cor < 0) {color = "blue"}
+  
+        if (j == 1) {
+          circos.rect(0, 0, x, 1,
+                      col= color,
+                      sector.index = genoz[i],
+                      track.index = 2)
+        }
+        else {
+          circos.rect(xi, 0, x, 1,
+                      col= color,
+                      sector.index = genoz[i],
+                      track.index = 2)
+        }
+      }
+    }
+  
+    # Add the links between modules
+    transp <- 0.8
+  
+    skip_these <- data.frame(matrix(nrow=1,ncol=2))
+    names(skip_these) <- c("M1","M2")
+  
+    for (geno in genoz) {
+  
+      modulez <- connections[grep(geno, connections$M1) ,]
+      modulez <- rbind(modulez, connections[grep(geno, connections$M2) ,])
+      modulez[grep(geno, modulez$M2), c("M2","M1")] <- modulez[grep(geno, modulez$M2), c("M1","M2")]
+  
+  
+      t <- table(modulez$M1)
+      dup_1 <- names(which(t[]>1))
+  
+      if (!identical(dup_1, character(0))) {
+        for (i in 1:length(dup_1)) {
+          loc <- grep(dup_1[i], modulez$M1)
+          modulez <- separate(data= modulez, col= M2, into= c("genotype", "module"), sep = "\\_")
+          dummy_mod_1 <- data.frame(matrix(nrow= nrow(modulez), ncol= ncol(modulez)))
+          dummy_mod_1[loc,] <- modulez[loc,]
+          t <- table(dummy_mod_1[,2])
+          dup_g <- names(which(t[]>1))
+  
+          if (!identical(dup_g, character(0))) {
+            for (j in 1:length(dup_g)) {
+              loc <- which(dummy_mod_1[,2] == dup_g[j])
+              dummy_mod_2 <- c(rep(NA,nrow(modulez)))
+              dummy_mod_2[loc] <- modulez$pval[loc]
+              loc_min <- which.min(dummy_mod_2)
+              loc_remove <- loc[loc != loc_min]
+              modulez <- modulez[-loc_remove,]
+            }
+          }
+          modulez <- modulez %>% unite("M2", genotype:module, sep= "_", remove= TRUE)
+        }
+      }
+  
+  
+      t <- table(modulez$M2)
+      dup_2 <- names(which(t[]>1))
+  
+      if (!identical(dup_2, character(0))) {
+        for (i in 1:length(dup_2)) {
+          loc <- grep(dup_2[i], modulez$M2)
+          dummy_mod <- c(rep(NA,nrow(modulez)))
+          dummy_mod[loc] <- modulez$pval[loc]
+          loc_min <- which.min(dummy_mod)
+          loc_remove <- loc[loc != loc_min]
+          modulez <- modulez[-loc_remove,]
+        }}
+  
+      for (i in 1:nrow(modulez)) {
+        M1 <- modulez$M1[i]
+        M2 <- modulez$M2[i]
+  
+        test1 <- which(skip_these$M1 == M1 & skip_these$M2 == M2)
+        test2 <- which(skip_these$M1 == M2 & skip_these$M2 == M1)
+  
+        if (!identical(test1,integer(0)) | !identical(test2,integer(0))) next
+  
+        geno1 <- gsub("_.*","",M1)
+        geno2 <- gsub("_.*","",M2)
+  
+        loc_a <- which(mod_list[[geno1]]$geno_mod == M1)
+        loc_b <- which(mod_list[[geno2]]$geno_mod == M2)
+  
+        if (loc_a == 1) {
+          M1_i <- 0
+          M1_f <- mod_list[[geno1]][mod_list[[geno1]]$geno_mod == M1,"end_position"]}
+  
+        if (loc_a > 1) {
+          M1_i <- mod_list[[geno1]][loc_a-1,"end_position"]
+          M1_f <- mod_list[[geno1]][mod_list[[geno1]]$geno_mod == M1,"end_position"]}
+  
+        if (loc_b == 1) {
+          M2_i <- 0
+          M2_f <- mod_list[[geno2]][mod_list[[geno2]]$geno_mod == M2,"end_position"]}
+  
+        if (loc_b > 1) {
+          M2_i <- mod_list[[geno2]][loc_b-1,"end_position"]
+          M2_f <- mod_list[[geno2]][mod_list[[geno2]]$geno_mod == M2,"end_position"]}
+  
+        M1_cor <- mod_list[[geno1]][mod_list[[geno1]]$geno_mod == M1,"cor"]
+        M2_cor <- mod_list[[geno2]][mod_list[[geno2]]$geno_mod == M2,"cor"]
+  
+        if (M1_cor > 0 & M2_cor > 0) {color = "green"}
+        if (M1_cor < 0 & M2_cor < 0) {color = "blue"}
+        if (M1_cor > 0 & M2_cor < 0) {color = "red"}
+        if (M1_cor < 0 & M2_cor > 0) {color = "red"}
+  
+        circos.link(geno1, c(M1_i, M1_f),
+                    geno2, c(M2_i, M2_f),
+                    col=add_transparency(color, transp))
+      }
+  
+      skip_these <- rbind(skip_these, modulez[,1:2])
+      skip_these <- na.omit(skip_these)
+    }
+  
+  
+    # Highlight the genotypes
+    for(i in 1:length(genoz)) {
+      highlight.sector(sector.index = genoz[i],
+                       track.index = 1,
+                       col = geno_color[i],
+                       text = genoz[i],
+                       text.vjust = -2,
+                       niceFacing = TRUE)
+    }
+  
+    circos.clear()
+
+  dev.off()
+
+  return(plot_path)
+  
+}
 ```
 
 ``` r
-# for (i in 1:length(tissuez)) {
-#   circos.plot(tissuez[i])
-# }
+for (i in 1:length(tissuez)) {
+  plot_pathz <- circos.plot(tissuez[i])
+}
+
+for (plot_path in plot_pathz) {
+  knitr::include_graphics(plot_path)
+}
 ```
 
 ``` r
@@ -859,8 +869,8 @@ sessionInfo()
     ## [124] httpuv_1.6.11          patchwork_1.1.3        R6_2.5.1              
     ## [127] promises_1.2.1         KernSmooth_2.23-20     gridExtra_2.3         
     ## [130] IRanges_2.30.1         parallelly_1.36.0      codetools_0.2-19      
-    ## [133] MASS_7.3-60            gtools_3.9.4           sctransform_0.3.5     
-    ## [136] GenomeInfoDbData_1.2.8 S4Vectors_0.34.0       parallel_4.2.1        
-    ## [139] rpart_4.1.19           grid_4.2.1             rmarkdown_2.24        
-    ## [142] Rtsne_0.16             spatstat.explore_3.2-1 base64enc_0.1-3       
-    ## [145] Biobase_2.56.0         shiny_1.7.5
+    ## [133] MASS_7.3-60            gtools_3.9.4           withr_3.0.0           
+    ## [136] sctransform_0.3.5      GenomeInfoDbData_1.2.8 S4Vectors_0.34.0      
+    ## [139] parallel_4.2.1         rpart_4.1.19           grid_4.2.1            
+    ## [142] rmarkdown_2.24         Rtsne_0.16             spatstat.explore_3.2-1
+    ## [145] base64enc_0.1-3        Biobase_2.56.0         shiny_1.7.5
