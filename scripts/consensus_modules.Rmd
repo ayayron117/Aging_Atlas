@@ -23,7 +23,7 @@ library(igraph)
 library(scales)
 library(ggplot2)
 library(RColorBrewer)
-library(xlsx)
+library(openxlsx)
 
 ```
 
@@ -35,16 +35,13 @@ seurat_data <- readRDS(file = '/Users/asm/Creighton/celegan/worm_20221014.rds')
 
 ```{r}
 
-main_path <- ('/Users/asm/Creighton/celegan/Modules/_consensus')
-other_path <- ('/Users/asm/Creighton/celegan/Modules')
+main_path <- ('/Users/asm/Documents/git_for_jobs/consensus')
+dir.create(main_path)
+other_path <- ('/Users/asm/Documents/git_for_jobs/Modules')
 
 # List the tissue directories that will be analyzed. This is just to get their names.
-tissuez <- list.dirs('/Users/asm/Creighton/celegan/Bootstrap/_tissues_with_3_N2_timepoints',
-                     full.names=FALSE, 
-                     recursive= FALSE)
+tissuez <- "Neuron"
 
-# Remove embryonic cells
-tissuez <- tissuez[-1]
 
 ```
 
@@ -122,11 +119,7 @@ consensus.modules.func <- function (tissue_name) {
 
 ```{r}
 
-for (i in 1:4) {
-consensus.modules.func(tissuez[i])
-}
-
-for (i in 6:7) {
+for (i in 1) {
 consensus.modules.func(tissuez[i])
 }
 
@@ -361,7 +354,7 @@ tissue_dir <- file.path(main_path, tissue_name)
   # hub_labels <- as.character(unlist(hub_list))
   
 for (i in 1:length(hub_list)) {
-write.xlsx(hub_list[[i]], file=file.path(tissue_dir, "hub_genes.xlsx"), sheetName=names(hub_list[i]), row.names=FALSE, append=TRUE, col.names= FALSE)
+write.xlsx(hub_list[[i]], file.path(tissue_dir, "hub_genes.xlsx"), rowNames=FALSE, colNames= FALSE)
 }
   
 ```
