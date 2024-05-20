@@ -24,12 +24,7 @@ tissuez <- c("Germline", "Hypodermis", "Intestine", "Muscle",
              "Neuron", "Pharynx", "Vulva_uterus")
 ```
 
-<<<<<<< HEAD
 <p style="text-align: center;">
-=======
-<div style="text-align: center;">
-
->>>>>>> a070e93b9fae0752ba857c00d98011abe7714553
 <h1>
 WGCNA & Module Trait Correlation
 </h1>
