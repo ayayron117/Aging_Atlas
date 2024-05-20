@@ -613,10 +613,10 @@ circos.plot <- function (tissue) {
                                   # Circos Plot
   ##############################################################################
 
-  circos_file_name <- paste(tissue, "circos_plot.pdf", sep = "_")
+  circos_file_name <- paste(tissue, "circos_plot.svg", sep = "_")
   plot_path <- file.path(plots_path, circos_file_name)
-
-  pdf(plot_path, width = 8, height = 8)
+  
+  svg(plot_path, width = 8, height = 8)
   
     geno_color <- c(2,3,4,6)
     
@@ -797,8 +797,7 @@ for (i in 1:length(tissuez)) {
 }
 ```
 
-<embed src="Modules/Circos_plots/Neuron_circos_plot.pdf" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" type="application/pdf" />
-<embed src="Modules/Circos_plots/Intestine_circos_plot.pdf" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" type="application/pdf" />
+<img src="Modules/Circos_plots/Neuron_circos_plot.svg" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" /><img src="Modules/Circos_plots/Intestine_circos_plot.svg" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" />
 
 ``` r
 sessionInfo()
