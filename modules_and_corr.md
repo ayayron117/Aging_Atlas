@@ -24,14 +24,12 @@ tissuez <- c("Germline", "Hypodermis", "Intestine", "Muscle",
              "Neuron", "Pharynx", "Vulva_uterus")
 ```
 
-<p style="text-align: center;">
+<p align="center">
 <h1>
 WGCNA & Module Trait Correlation
 </h1>
 </p>
-
-<div style="font-size: 30px">
-
+<p style="font-size: 50px">
 In this section, I wrote a function that does the following:
 <ul>
 <li>
@@ -48,8 +46,7 @@ Calculates the gene intersection sizes between the modules of each
 genotype
 </li>
 </ul>
-
-</div>
+</p>
 
 ``` r
 modules.correlations.func <- function (tissue_name) {
