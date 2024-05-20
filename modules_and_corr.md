@@ -298,198 +298,186 @@ modules.correlations.func <- function (tissue_name) {
 for (i in 1:length(tissuez)) {modules.correlations.func(tissuez[i])}
 ```
 
-    ## pickSoftThreshold: will use block size 4297.
-    ##  pickSoftThreshold: calculating connectivity for given powers...
-    ##    ..working on genes 1 through 4297 of 4297
-    ##    Power SFT.R.sq slope truncated.R.sq  mean.k. median.k.  max.k.
-    ## 1      1   0.0605  7.60          0.921 2.17e+03  2.18e+03 2330.00
-    ## 2      2   0.1910 -6.14          0.937 1.13e+03  1.12e+03 1330.00
-    ## 3      3   0.5450 -7.45          0.947 5.95e+02  5.87e+02  807.00
-    ## 4      4   0.7930 -6.91          0.977 3.22e+02  3.13e+02  511.00
-    ## 5      5   0.8480 -5.77          0.981 1.77e+02  1.70e+02  336.00
-    ## 6      6   0.8890 -4.79          0.986 9.98e+01  9.33e+01  228.00
-    ## 7      7   0.9040 -4.14          0.984 5.74e+01  5.21e+01  159.00
-    ## 8      8   0.9240 -3.59          0.978 3.37e+01  2.93e+01  113.00
-    ## 9      9   0.9340 -3.19          0.971 2.02e+01  1.68e+01   82.80
-    ## 10    10   0.9310 -2.89          0.958 1.24e+01  9.79e+00   62.20
-    ## 11    12   0.9630 -2.34          0.966 4.98e+00  3.40e+00   37.00
-    ## 12    14   0.9800 -1.97          0.975 2.20e+00  1.22e+00   23.40
-    ## 13    16   0.9840 -1.74          0.979 1.06e+00  4.55e-01   15.80
-    ## 14    18   0.9760 -1.61          0.970 5.56e-01  1.74e-01   11.50
-    ## 15    20   0.9690 -1.52          0.962 3.15e-01  6.80e-02    8.50
-    ## 16    22   0.9730 -1.42          0.967 1.90e-01  2.72e-02    6.39
-    ## 17    24   0.9760 -1.35          0.973 1.21e-01  1.11e-02    4.86
-    ## 18    26   0.9360 -1.35          0.936 7.98e-02  4.55e-03    3.81
-    ## 19    28   0.9370 -1.32          0.950 5.46e-02  1.93e-03    3.10
-    ## 20    30   0.8810 -1.37          0.920 3.84e-02  8.17e-04    2.55
-    ## Soft power not provided. Automatically using the lowest power that meets 0.8 scale-free topology fit. Using soft_power = 5
-    ##  Calculating consensus modules and module eigengenes block-wise from all genes
-    ##  Calculating topological overlaps block-wise from all genes
-    ##    Flagging genes and samples with too many missing values...
-    ##     ..step 1
-    ##     TOM calculation: adjacency..
-    ##     ..will not use multithreading.
-    ##      Fraction of slow calculations: 0.000000
-    ##     ..connectivity..
-    ##     ..matrix multiplication (system BLAS)..
-    ##     ..normalization..
-    ##     ..done.
-    ##  ..Working on block 1 .
-    ##  ..Working on block 1 .
-    ##  ..merging consensus modules that are too close..
-    ## [1] "yellow"
-    ## [1] "grey"
-    ## [1] "blue"
-    ## [1] "brown"
-    ## [1] "turquoise"
-    ## [1] "red"
-    ## [1] "green"
-    ## pickSoftThreshold: will use block size 4297.
-    ##  pickSoftThreshold: calculating connectivity for given powers...
-    ##    ..working on genes 1 through 4297 of 4297
-    ##    Power SFT.R.sq  slope truncated.R.sq  mean.k. median.k.  max.k.
-    ## 1      1   0.0508  14.50          0.934 2.16e+03  2.16e+03 2220.00
-    ## 2      2   0.3260 -21.70          0.981 1.10e+03  1.10e+03 1190.00
-    ## 3      3   0.6240 -21.90          0.955 5.66e+02  5.64e+02  657.00
-    ## 4      4   0.7280 -16.40          0.964 2.97e+02  2.94e+02  372.00
-    ## 5      5   0.8200 -12.30          0.972 1.57e+02  1.55e+02  219.00
-    ## 6      6   0.8880 -10.70          0.987 8.48e+01  8.28e+01  140.00
-    ## 7      7   0.9310  -8.28          0.988 4.63e+01  4.46e+01   94.00
-    ## 8      8   0.9550  -6.54          0.989 2.57e+01  2.43e+01   65.70
-    ## 9      9   0.9690  -5.33          0.989 1.44e+01  1.33e+01   47.60
-    ## 10    10   0.9770  -4.48          0.991 8.27e+00  7.39e+00   35.60
-    ## 11    12   0.9810  -3.39          0.988 2.85e+00  2.33e+00   21.30
-    ## 12    14   0.9770  -2.75          0.984 1.06e+00  7.57e-01   13.60
-    ## 13    16   0.9830  -2.29          0.991 4.33e-01  2.53e-01    9.14
-    ## 14    18   0.9730  -2.00          0.978 1.94e-01  8.66e-02    6.34
-    ## 15    20   0.9740  -1.79          0.979 9.51e-02  3.05e-02    4.52
-    ## 16    22   0.9690  -1.64          0.969 5.10e-02  1.09e-02    3.29
-    ## 17    24   0.9720  -1.52          0.967 2.95e-02  4.03e-03    2.44
-    ## 18    26   0.9860  -1.44          0.986 1.82e-02  1.50e-03    1.84
-    ## 19    28   0.9650  -1.39          0.959 1.18e-02  5.72e-04    1.41
-    ## 20    30   0.9570  -1.36          0.948 7.96e-03  2.23e-04    1.09
-    ## Soft power not provided. Automatically using the lowest power that meets 0.8 scale-free topology fit. Using soft_power = 5
-    ##  Calculating consensus modules and module eigengenes block-wise from all genes
-    ##  Calculating topological overlaps block-wise from all genes
-    ##    Flagging genes and samples with too many missing values...
-    ##     ..step 1
-    ##     TOM calculation: adjacency..
-    ##     ..will not use multithreading.
-    ##      Fraction of slow calculations: 0.000000
-    ##     ..connectivity..
-    ##     ..matrix multiplication (system BLAS)..
-    ##     ..normalization..
-    ##     ..done.
-    ##  ..Working on block 1 .
-    ##  ..Working on block 1 .
-    ##  ..merging consensus modules that are too close..
-    ## [1] "blue"
-    ## [1] "turquoise"
-    ## [1] "grey"
-    ## [1] "red"
-    ## [1] "brown"
-    ## [1] "green"
-    ## [1] "black"
-    ## [1] "yellow"
-    ## pickSoftThreshold: will use block size 4297.
-    ##  pickSoftThreshold: calculating connectivity for given powers...
-    ##    ..working on genes 1 through 4297 of 4297
-    ##    Power SFT.R.sq  slope truncated.R.sq  mean.k. median.k.  max.k.
-    ## 1      1   0.0062   8.31          0.998 2.15e+03  2.15e+03 2200.00
-    ## 2      2   0.0130  -6.55          0.948 1.09e+03  1.09e+03 1140.00
-    ## 3      3   0.0523  -8.50          0.914 5.56e+02  5.55e+02  602.00
-    ## 4      4   0.2610 -13.60          0.943 2.87e+02  2.85e+02  325.00
-    ## 5      5   0.5100 -12.10          0.924 1.49e+02  1.48e+02  178.00
-    ## 6      6   0.7460 -11.70          0.923 7.82e+01  7.72e+01  107.00
-    ## 7      7   0.8890  -9.49          0.945 4.15e+01  4.05e+01   66.70
-    ## 8      8   0.9530  -7.58          0.957 2.22e+01  2.14e+01   43.90
-    ## 9      9   0.9810  -6.16          0.978 1.20e+01  1.14e+01   30.40
-    ## 10    10   0.9920  -5.08          0.990 6.61e+00  6.11e+00   22.60
-    ## 11    12   0.9610  -3.78          0.950 2.08e+00  1.79e+00   14.10
-    ## 12    14   0.9750  -2.88          0.967 7.06e-01  5.38e-01    9.89
-    ## 13    16   0.4200  -3.20          0.273 2.63e-01  1.65e-01    7.48
-    ## 14    18   0.4510  -2.77          0.369 1.10e-01  5.20e-02    5.91
-    ## 15    20   0.4480  -2.40          0.379 5.26e-02  1.68e-02    4.81
-    ## 16    22   0.4080  -2.59          0.367 2.85e-02  5.51e-03    4.01
-    ## 17    24   0.4090  -2.39          0.381 1.72e-02  1.85e-03    3.39
-    ## 18    26   0.4080  -2.54          0.369 1.13e-02  6.32e-04    2.91
-    ## 19    28   0.3700  -2.00          0.210 7.86e-03  2.20e-04    2.52
-    ## 20    30   0.3570  -2.16          0.181 5.74e-03  7.77e-05    2.21
-    ## Soft power not provided. Automatically using the lowest power that meets 0.8 scale-free topology fit. Using soft_power = 7
-    ##  Calculating consensus modules and module eigengenes block-wise from all genes
-    ##  Calculating topological overlaps block-wise from all genes
-    ##    Flagging genes and samples with too many missing values...
-    ##     ..step 1
-    ##     TOM calculation: adjacency..
-    ##     ..will not use multithreading.
-    ##      Fraction of slow calculations: 0.000000
-    ##     ..connectivity..
-    ##     ..matrix multiplication (system BLAS)..
-    ##     ..normalization..
-    ##     ..done.
-    ##  ..Working on block 1 .
-    ##  ..Working on block 1 .
-    ##  ..merging consensus modules that are too close..
-    ## [1] "green"
-    ## [1] "blue"
-    ## [1] "grey"
-    ## [1] "turquoise"
-    ## [1] "brown"
-    ## [1] "black"
-    ## [1] "red"
-    ## [1] "yellow"
-    ##   ..Excluding 1 genes from the calculation due to too many missing samples or zero variance.
-    ## pickSoftThreshold: will use block size 4296.
-    ##  pickSoftThreshold: calculating connectivity for given powers...
-    ##    ..working on genes 1 through 4296 of 4296
-    ##    Power SFT.R.sq  slope truncated.R.sq  mean.k. median.k.  max.k.
-    ## 1      1   0.1200  33.90          0.974 2.16e+03  2.16e+03 2220.00
-    ## 2      2   0.0792  15.20          0.995 1.10e+03  1.10e+03 1160.00
-    ## 3      3   0.0368  -6.38          0.975 5.64e+02  5.63e+02  624.00
-    ## 4      4   0.3640 -12.00          0.811 2.93e+02  2.92e+02  355.00
-    ## 5      5   0.6130 -10.10          0.710 1.54e+02  1.52e+02  213.00
-    ## 6      6   0.7780  -7.92          0.736 8.16e+01  8.03e+01  134.00
-    ## 7      7   0.8770  -6.31          0.851 4.39e+01  4.26e+01   89.80
-    ## 8      8   0.9010  -5.11          0.926 2.39e+01  2.28e+01   63.80
-    ## 9      9   0.9080  -4.18          0.936 1.32e+01  1.23e+01   47.60
-    ## 10    10   0.8990  -3.37          0.926 7.44e+00  6.69e+00   36.80
-    ## 11    12   0.9110  -2.41          0.927 2.51e+00  2.01e+00   24.00
-    ## 12    14   0.9320  -1.97          0.930 9.39e-01  6.25e-01   16.80
-    ## 13    16   0.9430  -1.69          0.928 4.02e-01  1.99e-01   12.20
-    ## 14    18   0.9620  -1.49          0.953 1.99e-01  6.50e-02    9.09
-    ## 15    20   0.9720  -1.34          0.971 1.12e-01  2.17e-02    6.87
-    ## 16    22   0.9640  -1.24          0.967 6.98e-02  7.42e-03    5.25
-    ## 17    24   0.9560  -1.18          0.969 4.64e-02  2.59e-03    4.05
-    ## 18    26   0.9620  -1.13          0.988 3.23e-02  9.22e-04    3.14
-    ## 19    28   0.9580  -1.10          0.987 2.31e-02  3.33e-04    2.44
-    ## 20    30   0.9380  -1.08          0.970 1.68e-02  1.23e-04    1.91
-    ## Soft power not provided. Automatically using the lowest power that meets 0.8 scale-free topology fit. Using soft_power = 7
-    ##  Calculating consensus modules and module eigengenes block-wise from all genes
-    ##  Calculating topological overlaps block-wise from all genes
-    ##    Flagging genes and samples with too many missing values...
-    ##     ..step 1
-    ##     TOM calculation: adjacency..
-    ##     ..will not use multithreading.
-    ##      Fraction of slow calculations: 0.000000
-    ##     ..connectivity..
-    ##     ..matrix multiplication (system BLAS)..
-    ##     ..normalization..
-    ##     ..done.
-    ##  ..Working on block 1 .
-    ##  ..Working on block 1 .
-    ##  ..merging consensus modules that are too close..
-    ## [1] "turquoise"
-    ## [1] "grey"
-    ## [1] "brown"
-    ## [1] "red"
-    ## [1] "green"
-    ## [1] "black"
-    ## [1] "blue"
-    ## [1] "yellow"
-    ## [1] "subsetting"
-    ## [1] "subsetting"
-    ## [1] "subsetting"
-    ## [1] "subsetting"
+Below is an example of the gene overlap results for neurons:
+
+    ##                 M1              M2 M1_size M2_size Intersection_size
+    ## 1        N2_yellow      LIPL4_blue     339     677               275
+    ## 2        N2_yellow     LIPL4_brown     339     149                14
+    ## 3        N2_yellow      DAF2_green     339     201                77
+    ## 4        N2_yellow       DAF2_blue     339     310               220
+    ## 5        N2_yellow      DAF2_brown     339     243                 1
+    ## 6        N2_yellow RSKS1_turquoise     339     601               267
+    ## 7        N2_yellow     RSKS1_brown     339     330                 0
+    ## 8         N2_brown      LIPL4_blue     389     677                32
+    ## 9         N2_brown     LIPL4_brown     389     149                57
+    ## 10        N2_brown      DAF2_green     389     201                11
+    ## 11        N2_brown       DAF2_blue     389     310                 3
+    ## 12        N2_brown      DAF2_brown     389     243                 5
+    ## 13        N2_brown RSKS1_turquoise     389     601                45
+    ## 14        N2_brown     RSKS1_brown     389     330                13
+    ## 15    N2_turquoise      LIPL4_blue     872     677                87
+    ## 16    N2_turquoise     LIPL4_brown     872     149                 6
+    ## 17    N2_turquoise      DAF2_green     872     201                23
+    ## 18    N2_turquoise       DAF2_blue     872     310                11
+    ## 19    N2_turquoise      DAF2_brown     872     243                52
+    ## 20    N2_turquoise RSKS1_turquoise     872     601                53
+    ## 21    N2_turquoise     RSKS1_brown     872     330                98
+    ## 22        N2_green      LIPL4_blue      94     677                 0
+    ## 23        N2_green     LIPL4_brown      94     149                 0
+    ## 24        N2_green      DAF2_green      94     201                 0
+    ## 25        N2_green       DAF2_blue      94     310                 0
+    ## 26        N2_green      DAF2_brown      94     243                13
+    ## 27        N2_green RSKS1_turquoise      94     601                 0
+    ## 28        N2_green     RSKS1_brown      94     330                 6
+    ## 29      LIPL4_blue       N2_yellow     677     339               275
+    ## 30      LIPL4_blue        N2_brown     677     389                32
+    ## 31      LIPL4_blue    N2_turquoise     677     872                87
+    ## 32      LIPL4_blue        N2_green     677      94                 0
+    ## 33      LIPL4_blue      DAF2_green     677     201               119
+    ## 34      LIPL4_blue       DAF2_blue     677     310               239
+    ## 35      LIPL4_blue      DAF2_brown     677     243                10
+    ## 36      LIPL4_blue RSKS1_turquoise     677     601               364
+    ## 37      LIPL4_blue     RSKS1_brown     677     330                13
+    ## 38     LIPL4_brown       N2_yellow     149     339                14
+    ## 39     LIPL4_brown        N2_brown     149     389                57
+    ## 40     LIPL4_brown    N2_turquoise     149     872                 6
+    ## 41     LIPL4_brown        N2_green     149      94                 0
+    ## 42     LIPL4_brown      DAF2_green     149     201                 7
+    ## 43     LIPL4_brown       DAF2_blue     149     310                12
+    ## 44     LIPL4_brown      DAF2_brown     149     243                 2
+    ## 45     LIPL4_brown RSKS1_turquoise     149     601                23
+    ## 46     LIPL4_brown     RSKS1_brown     149     330                 4
+    ## 47      DAF2_green       N2_yellow     201     339                77
+    ## 48      DAF2_green        N2_brown     201     389                11
+    ## 49      DAF2_green    N2_turquoise     201     872                23
+    ## 50      DAF2_green        N2_green     201      94                 0
+    ## 51      DAF2_green      LIPL4_blue     201     677               119
+    ## 52      DAF2_green     LIPL4_brown     201     149                 7
+    ## 53      DAF2_green RSKS1_turquoise     201     601               134
+    ## 54      DAF2_green     RSKS1_brown     201     330                 0
+    ## 55       DAF2_blue       N2_yellow     310     339               220
+    ## 56       DAF2_blue        N2_brown     310     389                 3
+    ## 57       DAF2_blue    N2_turquoise     310     872                11
+    ## 58       DAF2_blue        N2_green     310      94                 0
+    ## 59       DAF2_blue      LIPL4_blue     310     677               239
+    ## 60       DAF2_blue     LIPL4_brown     310     149                12
+    ## 61       DAF2_blue RSKS1_turquoise     310     601               233
+    ## 62       DAF2_blue     RSKS1_brown     310     330                 0
+    ## 63      DAF2_brown       N2_yellow     243     339                 1
+    ## 64      DAF2_brown        N2_brown     243     389                 5
+    ## 65      DAF2_brown    N2_turquoise     243     872                52
+    ## 66      DAF2_brown        N2_green     243      94                13
+    ## 67      DAF2_brown      LIPL4_blue     243     677                10
+    ## 68      DAF2_brown     LIPL4_brown     243     149                 2
+    ## 69      DAF2_brown RSKS1_turquoise     243     601                 4
+    ## 70      DAF2_brown     RSKS1_brown     243     330                 5
+    ## 71 RSKS1_turquoise       N2_yellow     601     339               267
+    ## 72 RSKS1_turquoise        N2_brown     601     389                45
+    ## 73 RSKS1_turquoise    N2_turquoise     601     872                53
+    ## 74 RSKS1_turquoise        N2_green     601      94                 0
+    ## 75 RSKS1_turquoise      LIPL4_blue     601     677               364
+    ## 76 RSKS1_turquoise     LIPL4_brown     601     149                23
+    ## 77 RSKS1_turquoise      DAF2_green     601     201               134
+    ## 78 RSKS1_turquoise       DAF2_blue     601     310               233
+    ## 79 RSKS1_turquoise      DAF2_brown     601     243                 4
+    ## 80     RSKS1_brown       N2_yellow     330     339                 0
+    ## 81     RSKS1_brown        N2_brown     330     389                13
+    ## 82     RSKS1_brown    N2_turquoise     330     872                98
+    ## 83     RSKS1_brown        N2_green     330      94                 6
+    ## 84     RSKS1_brown      LIPL4_blue     330     677                13
+    ## 85     RSKS1_brown     LIPL4_brown     330     149                 4
+    ## 86     RSKS1_brown      DAF2_green     330     201                 0
+    ## 87     RSKS1_brown       DAF2_blue     330     310                 0
+    ## 88     RSKS1_brown      DAF2_brown     330     243                 5
+    ##             pval
+    ## 1  9.803770e-179
+    ## 2   2.849248e-01
+    ## 3   5.094222e-36
+    ## 4  1.780775e-203
+    ## 5   1.000000e+00
+    ## 6  1.227035e-183
+    ## 7   1.000000e+00
+    ## 8   9.999985e-01
+    ## 9   2.960469e-23
+    ## 10  9.797214e-01
+    ## 11  1.000000e+00
+    ## 12  9.999990e-01
+    ## 13  9.383061e-01
+    ## 14  9.999354e-01
+    ## 15  1.000000e+00
+    ## 16  1.000000e+00
+    ## 17  9.997597e-01
+    ## 18  1.000000e+00
+    ## 19  3.550733e-01
+    ## 20  1.000000e+00
+    ## 21  1.490869e-05
+    ## 22  1.000000e+00
+    ## 23  1.000000e+00
+    ## 24  1.000000e+00
+    ## 25  1.000000e+00
+    ## 26  2.167173e-03
+    ## 27  1.000000e+00
+    ## 28  7.398978e-01
+    ## 29 9.803770e-179
+    ## 30  9.999985e-01
+    ## 31  1.000000e+00
+    ## 32  1.000000e+00
+    ## 33  1.213525e-47
+    ## 34 7.626527e-143
+    ## 35  1.000000e+00
+    ## 36 2.959245e-174
+    ## 37  1.000000e+00
+    ## 38  2.849248e-01
+    ## 39  2.960469e-23
+    ## 40  1.000000e+00
+    ## 41  1.000000e+00
+    ## 42  5.517590e-01
+    ## 43  3.889256e-01
+    ## 44  9.984997e-01
+    ## 45  3.367095e-01
+    ## 46  9.976080e-01
+    ## 47  5.094222e-36
+    ## 48  9.797214e-01
+    ## 49  9.997597e-01
+    ## 50  1.000000e+00
+    ## 51  1.213525e-47
+    ## 52  5.517590e-01
+    ## 53  2.154763e-70
+    ## 54  1.000000e+00
+    ## 55 1.780775e-203
+    ## 56  1.000000e+00
+    ## 57  1.000000e+00
+    ## 58  1.000000e+00
+    ## 59 7.626527e-143
+    ## 60  3.889256e-01
+    ## 61 1.093832e-148
+    ## 62  1.000000e+00
+    ## 63  1.000000e+00
+    ## 64  9.999990e-01
+    ## 65  3.550733e-01
+    ## 66  2.167173e-03
+    ## 67  1.000000e+00
+    ## 68  9.984997e-01
+    ## 69  1.000000e+00
+    ## 70  9.999787e-01
+    ## 71 1.227035e-183
+    ## 72  9.383061e-01
+    ## 73  1.000000e+00
+    ## 74  1.000000e+00
+    ## 75 2.959245e-174
+    ## 76  3.367095e-01
+    ## 77  2.154763e-70
+    ## 78 1.093832e-148
+    ## 79  1.000000e+00
+    ## 80  1.000000e+00
+    ## 81  9.999354e-01
+    ## 82  1.490869e-05
+    ## 83  7.398978e-01
+    ## 84  1.000000e+00
+    ## 85  9.976080e-01
+    ## 86  1.000000e+00
+    ## 87  1.000000e+00
+    ## 88  9.999787e-01
 
     ## R version 4.2.1 (2022-06-23)
     ## Platform: x86_64-apple-darwin17.0 (64-bit)
@@ -532,31 +520,31 @@ for (i in 1:length(tissuez)) {modules.correlations.func(tissuez[i])}
     ##  [55] htmlTable_2.4.1        viridisLite_0.4.2      xtable_1.8-4          
     ##  [58] reticulate_1.35.0      foreign_0.8-85         bit_4.0.5             
     ##  [61] preprocessCore_1.58.0  Formula_1.2-5          stats4_4.2.1          
-    ##  [64] htmlwidgets_1.6.2      httr_1.4.7             FNN_1.1.3.2           
-    ##  [67] gplots_3.1.3           RColorBrewer_1.1-3     ellipsis_0.3.2        
-    ##  [70] ica_1.0-3              pkgconfig_2.0.3        nnet_7.3-19           
-    ##  [73] uwot_0.1.16            deldir_1.0-9           utf8_1.2.4            
-    ##  [76] tidyselect_1.2.0       rlang_1.1.3            reshape2_1.4.4        
-    ##  [79] later_1.3.1            AnnotationDbi_1.58.0   munsell_0.5.0         
-    ##  [82] tools_4.2.1            cachem_1.0.8           cli_3.6.2             
-    ##  [85] generics_0.1.3         RSQLite_2.3.1          ggridges_0.5.4        
-    ##  [88] evaluate_0.21          stringr_1.5.1          fastmap_1.1.1         
-    ##  [91] yaml_2.3.7             goftest_1.2-3          knitr_1.43            
-    ##  [94] bit64_4.0.5            fitdistrplus_1.1-11    caTools_1.18.2        
-    ##  [97] purrr_1.0.2            RANN_2.6.1             KEGGREST_1.36.3       
-    ## [100] pbapply_1.7-2          future_1.33.0          nlme_3.1-162          
-    ## [103] mime_0.12              compiler_4.2.1         rstudioapi_0.14       
-    ## [106] plotly_4.10.2          png_0.1-8              spatstat.utils_3.0-3  
-    ## [109] tibble_3.2.1           stringi_1.8.3          lattice_0.21-8        
-    ## [112] Matrix_1.5-4           vctrs_0.6.5            pillar_1.9.0          
-    ## [115] lifecycle_1.0.4        spatstat.geom_3.2-4    lmtest_0.9-40         
-    ## [118] RcppAnnoy_0.0.21       data.table_1.14.8      cowplot_1.1.1         
-    ## [121] bitops_1.0-7           irlba_2.3.5.1          httpuv_1.6.11         
-    ## [124] patchwork_1.1.3        R6_2.5.1               promises_1.2.1        
-    ## [127] KernSmooth_2.23-20     gridExtra_2.3          IRanges_2.30.1        
-    ## [130] parallelly_1.36.0      codetools_0.2-19       MASS_7.3-60           
-    ## [133] gtools_3.9.4           withr_3.0.0            sctransform_0.3.5     
-    ## [136] GenomeInfoDbData_1.2.8 S4Vectors_0.34.0       parallel_4.2.1        
-    ## [139] rpart_4.1.19           grid_4.2.1             tidyr_1.3.0           
-    ## [142] rmarkdown_2.24         Rtsne_0.16             spatstat.explore_3.2-1
-    ## [145] base64enc_0.1-3        Biobase_2.56.0         shiny_1.7.5
+    ##  [64] htmlwidgets_1.6.2      httr_1.4.7             gplots_3.1.3          
+    ##  [67] RColorBrewer_1.1-3     ellipsis_0.3.2         ica_1.0-3             
+    ##  [70] pkgconfig_2.0.3        nnet_7.3-19            uwot_0.1.16           
+    ##  [73] deldir_1.0-9           utf8_1.2.4             tidyselect_1.2.0      
+    ##  [76] rlang_1.1.3            reshape2_1.4.4         later_1.3.1           
+    ##  [79] AnnotationDbi_1.58.0   munsell_0.5.0          tools_4.2.1           
+    ##  [82] cachem_1.0.8           cli_3.6.2              generics_0.1.3        
+    ##  [85] RSQLite_2.3.1          ggridges_0.5.4         evaluate_0.21         
+    ##  [88] stringr_1.5.1          fastmap_1.1.1          yaml_2.3.7            
+    ##  [91] goftest_1.2-3          knitr_1.43             bit64_4.0.5           
+    ##  [94] fitdistrplus_1.1-11    caTools_1.18.2         purrr_1.0.2           
+    ##  [97] RANN_2.6.1             KEGGREST_1.36.3        pbapply_1.7-2         
+    ## [100] future_1.33.0          nlme_3.1-162           mime_0.12             
+    ## [103] compiler_4.2.1         rstudioapi_0.14        plotly_4.10.2         
+    ## [106] png_0.1-8              spatstat.utils_3.0-3   tibble_3.2.1          
+    ## [109] stringi_1.8.3          lattice_0.21-8         Matrix_1.5-4          
+    ## [112] vctrs_0.6.5            pillar_1.9.0           lifecycle_1.0.4       
+    ## [115] spatstat.geom_3.2-4    lmtest_0.9-40          RcppAnnoy_0.0.21      
+    ## [118] data.table_1.14.8      cowplot_1.1.1          bitops_1.0-7          
+    ## [121] irlba_2.3.5.1          httpuv_1.6.11          patchwork_1.1.3       
+    ## [124] R6_2.5.1               promises_1.2.1         KernSmooth_2.23-20    
+    ## [127] gridExtra_2.3          IRanges_2.30.1         parallelly_1.36.0     
+    ## [130] codetools_0.2-19       MASS_7.3-60            gtools_3.9.4          
+    ## [133] sctransform_0.3.5      GenomeInfoDbData_1.2.8 S4Vectors_0.34.0      
+    ## [136] parallel_4.2.1         rpart_4.1.19           grid_4.2.1            
+    ## [139] tidyr_1.3.0            rmarkdown_2.24         Rtsne_0.16            
+    ## [142] spatstat.explore_3.2-1 base64enc_0.1-3        Biobase_2.56.0        
+    ## [145] shiny_1.7.5
