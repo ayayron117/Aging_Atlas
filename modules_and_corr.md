@@ -791,14 +791,14 @@ circos.plot <- function (tissue) {
 ```
 
 ``` r
+plot_pathz <- {}
 for (i in 1:length(tissuez)) {
-  plot_pathz <- circos.plot(tissuez[i])
-}
-
-for (plot_path in plot_pathz) {
-  knitr::include_graphics(plot_path)
+  plot_pathz[i] <- circos.plot(tissuez[i])
 }
 ```
+
+<embed src="Modules/Circos_plots/Neuron_circos_plot.pdf" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" type="application/pdf" />
+<embed src="Modules/Circos_plots/Intestine_circos_plot.pdf" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" type="application/pdf" />
 
 ``` r
 sessionInfo()
@@ -861,16 +861,17 @@ sessionInfo()
     ## [100] pbapply_1.7-2          future_1.33.0          nlme_3.1-162          
     ## [103] mime_0.12              compiler_4.2.1         rstudioapi_0.14       
     ## [106] plotly_4.10.2          png_0.1-8              spatstat.utils_3.0-3  
-    ## [109] tibble_3.2.1           stringi_1.8.3          lattice_0.21-8        
-    ## [112] Matrix_1.5-4           vctrs_0.6.5            pillar_1.9.0          
-    ## [115] lifecycle_1.0.4        GlobalOptions_0.1.2    spatstat.geom_3.2-4   
-    ## [118] lmtest_0.9-40          RcppAnnoy_0.0.21       data.table_1.14.8     
-    ## [121] cowplot_1.1.1          bitops_1.0-7           irlba_2.3.5.1         
-    ## [124] httpuv_1.6.11          patchwork_1.1.3        R6_2.5.1              
-    ## [127] promises_1.2.1         KernSmooth_2.23-20     gridExtra_2.3         
-    ## [130] IRanges_2.30.1         parallelly_1.36.0      codetools_0.2-19      
-    ## [133] MASS_7.3-60            gtools_3.9.4           withr_3.0.0           
-    ## [136] sctransform_0.3.5      GenomeInfoDbData_1.2.8 S4Vectors_0.34.0      
-    ## [139] parallel_4.2.1         rpart_4.1.19           grid_4.2.1            
-    ## [142] rmarkdown_2.24         Rtsne_0.16             spatstat.explore_3.2-1
-    ## [145] base64enc_0.1-3        Biobase_2.56.0         shiny_1.7.5
+    ## [109] tibble_3.2.1           stringi_1.8.3          highr_0.10            
+    ## [112] lattice_0.21-8         Matrix_1.5-4           vctrs_0.6.5           
+    ## [115] pillar_1.9.0           lifecycle_1.0.4        GlobalOptions_0.1.2   
+    ## [118] spatstat.geom_3.2-4    lmtest_0.9-40          RcppAnnoy_0.0.21      
+    ## [121] data.table_1.14.8      cowplot_1.1.1          bitops_1.0-7          
+    ## [124] irlba_2.3.5.1          httpuv_1.6.11          patchwork_1.1.3       
+    ## [127] R6_2.5.1               promises_1.2.1         KernSmooth_2.23-20    
+    ## [130] gridExtra_2.3          IRanges_2.30.1         parallelly_1.36.0     
+    ## [133] codetools_0.2-19       MASS_7.3-60            gtools_3.9.4          
+    ## [136] withr_3.0.0            sctransform_0.3.5      GenomeInfoDbData_1.2.8
+    ## [139] S4Vectors_0.34.0       parallel_4.2.1         rpart_4.1.19          
+    ## [142] grid_4.2.1             rmarkdown_2.24         Rtsne_0.16            
+    ## [145] spatstat.explore_3.2-1 base64enc_0.1-3        Biobase_2.56.0        
+    ## [148] shiny_1.7.5
