@@ -298,7 +298,7 @@ modules.correlations.func <- function (tissue_name) {
 for (i in 1:length(tissuez)) {modules.correlations.func(tissuez[i])}
 ```
 
-# Below is an example of the gene overlap results between the modules of each genotype for neurons:
+## Below is an example of the gene overlap results between the modules of each genotype for neurons:
 
     ##                 M1              M2 M1_size M2_size Inter_size          pval
     ## 1        N2_yellow      LIPL4_blue     339     677        275 9.803770e-179
@@ -389,6 +389,10 @@ for (i in 1:length(tissuez)) {modules.correlations.func(tissuez[i])}
     ## 86     RSKS1_brown      DAF2_green     330     201          0  1.000000e+00
     ## 87     RSKS1_brown       DAF2_blue     330     310          0  1.000000e+00
     ## 88     RSKS1_brown      DAF2_brown     330     243          5  9.999787e-01
+
+``` r
+sessionInfo()
+```
 
     ## R version 4.2.1 (2022-06-23)
     ## Platform: x86_64-apple-darwin17.0 (64-bit)
