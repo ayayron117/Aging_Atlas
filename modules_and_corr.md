@@ -12,7 +12,7 @@ library(writexl)
 library(circlize)
 library(tidyr)
 
-# full_seurat <- readRDS(data_path)
+full_seurat <- readRDS(data_path)
 
 modules_path <- file.path(getwd(), "Modules")
 dir.create(modules_path)
@@ -292,6 +292,8 @@ modules.correlations.func <- function (tissue) {
     overlap[i,'pval'] <- overlapz[[i]]@pval
   }
   
+  colnames(overlap) <- c("M1", "M2", "M1_size", "M2_size", "Inter_size", "pval")
+  
   write.csv(overlap, 
             file.path(tissue_dir,
                       paste(tissue, 
@@ -323,184 +325,95 @@ for (i in 1:length(tissuez)) {modules.correlations.func(tissuez[i])}
 Below is an example of the overlap results between the modules of each
 genotype for neurons:
 
-    ##                 M1              M2 M1_size M2_size Intersection_size
-    ## 1        N2_yellow      LIPL4_blue     339     677               275
-    ## 2        N2_yellow     LIPL4_brown     339     149                14
-    ## 3        N2_yellow      DAF2_green     339     201                77
-    ## 4        N2_yellow       DAF2_blue     339     310               220
-    ## 5        N2_yellow      DAF2_brown     339     243                 1
-    ## 6        N2_yellow RSKS1_turquoise     339     601               267
-    ## 7        N2_yellow     RSKS1_brown     339     330                 0
-    ## 8         N2_brown      LIPL4_blue     389     677                32
-    ## 9         N2_brown     LIPL4_brown     389     149                57
-    ## 10        N2_brown      DAF2_green     389     201                11
-    ## 11        N2_brown       DAF2_blue     389     310                 3
-    ## 12        N2_brown      DAF2_brown     389     243                 5
-    ## 13        N2_brown RSKS1_turquoise     389     601                45
-    ## 14        N2_brown     RSKS1_brown     389     330                13
-    ## 15    N2_turquoise      LIPL4_blue     872     677                87
-    ## 16    N2_turquoise     LIPL4_brown     872     149                 6
-    ## 17    N2_turquoise      DAF2_green     872     201                23
-    ## 18    N2_turquoise       DAF2_blue     872     310                11
-    ## 19    N2_turquoise      DAF2_brown     872     243                52
-    ## 20    N2_turquoise RSKS1_turquoise     872     601                53
-    ## 21    N2_turquoise     RSKS1_brown     872     330                98
-    ## 22        N2_green      LIPL4_blue      94     677                 0
-    ## 23        N2_green     LIPL4_brown      94     149                 0
-    ## 24        N2_green      DAF2_green      94     201                 0
-    ## 25        N2_green       DAF2_blue      94     310                 0
-    ## 26        N2_green      DAF2_brown      94     243                13
-    ## 27        N2_green RSKS1_turquoise      94     601                 0
-    ## 28        N2_green     RSKS1_brown      94     330                 6
-    ## 29      LIPL4_blue       N2_yellow     677     339               275
-    ## 30      LIPL4_blue        N2_brown     677     389                32
-    ## 31      LIPL4_blue    N2_turquoise     677     872                87
-    ## 32      LIPL4_blue        N2_green     677      94                 0
-    ## 33      LIPL4_blue      DAF2_green     677     201               119
-    ## 34      LIPL4_blue       DAF2_blue     677     310               239
-    ## 35      LIPL4_blue      DAF2_brown     677     243                10
-    ## 36      LIPL4_blue RSKS1_turquoise     677     601               364
-    ## 37      LIPL4_blue     RSKS1_brown     677     330                13
-    ## 38     LIPL4_brown       N2_yellow     149     339                14
-    ## 39     LIPL4_brown        N2_brown     149     389                57
-    ## 40     LIPL4_brown    N2_turquoise     149     872                 6
-    ## 41     LIPL4_brown        N2_green     149      94                 0
-    ## 42     LIPL4_brown      DAF2_green     149     201                 7
-    ## 43     LIPL4_brown       DAF2_blue     149     310                12
-    ## 44     LIPL4_brown      DAF2_brown     149     243                 2
-    ## 45     LIPL4_brown RSKS1_turquoise     149     601                23
-    ## 46     LIPL4_brown     RSKS1_brown     149     330                 4
-    ## 47      DAF2_green       N2_yellow     201     339                77
-    ## 48      DAF2_green        N2_brown     201     389                11
-    ## 49      DAF2_green    N2_turquoise     201     872                23
-    ## 50      DAF2_green        N2_green     201      94                 0
-    ## 51      DAF2_green      LIPL4_blue     201     677               119
-    ## 52      DAF2_green     LIPL4_brown     201     149                 7
-    ## 53      DAF2_green RSKS1_turquoise     201     601               134
-    ## 54      DAF2_green     RSKS1_brown     201     330                 0
-    ## 55       DAF2_blue       N2_yellow     310     339               220
-    ## 56       DAF2_blue        N2_brown     310     389                 3
-    ## 57       DAF2_blue    N2_turquoise     310     872                11
-    ## 58       DAF2_blue        N2_green     310      94                 0
-    ## 59       DAF2_blue      LIPL4_blue     310     677               239
-    ## 60       DAF2_blue     LIPL4_brown     310     149                12
-    ## 61       DAF2_blue RSKS1_turquoise     310     601               233
-    ## 62       DAF2_blue     RSKS1_brown     310     330                 0
-    ## 63      DAF2_brown       N2_yellow     243     339                 1
-    ## 64      DAF2_brown        N2_brown     243     389                 5
-    ## 65      DAF2_brown    N2_turquoise     243     872                52
-    ## 66      DAF2_brown        N2_green     243      94                13
-    ## 67      DAF2_brown      LIPL4_blue     243     677                10
-    ## 68      DAF2_brown     LIPL4_brown     243     149                 2
-    ## 69      DAF2_brown RSKS1_turquoise     243     601                 4
-    ## 70      DAF2_brown     RSKS1_brown     243     330                 5
-    ## 71 RSKS1_turquoise       N2_yellow     601     339               267
-    ## 72 RSKS1_turquoise        N2_brown     601     389                45
-    ## 73 RSKS1_turquoise    N2_turquoise     601     872                53
-    ## 74 RSKS1_turquoise        N2_green     601      94                 0
-    ## 75 RSKS1_turquoise      LIPL4_blue     601     677               364
-    ## 76 RSKS1_turquoise     LIPL4_brown     601     149                23
-    ## 77 RSKS1_turquoise      DAF2_green     601     201               134
-    ## 78 RSKS1_turquoise       DAF2_blue     601     310               233
-    ## 79 RSKS1_turquoise      DAF2_brown     601     243                 4
-    ## 80     RSKS1_brown       N2_yellow     330     339                 0
-    ## 81     RSKS1_brown        N2_brown     330     389                13
-    ## 82     RSKS1_brown    N2_turquoise     330     872                98
-    ## 83     RSKS1_brown        N2_green     330      94                 6
-    ## 84     RSKS1_brown      LIPL4_blue     330     677                13
-    ## 85     RSKS1_brown     LIPL4_brown     330     149                 4
-    ## 86     RSKS1_brown      DAF2_green     330     201                 0
-    ## 87     RSKS1_brown       DAF2_blue     330     310                 0
-    ## 88     RSKS1_brown      DAF2_brown     330     243                 5
-    ##             pval
-    ## 1  9.803770e-179
-    ## 2   2.849248e-01
-    ## 3   5.094222e-36
-    ## 4  1.780775e-203
-    ## 5   1.000000e+00
-    ## 6  1.227035e-183
-    ## 7   1.000000e+00
-    ## 8   9.999985e-01
-    ## 9   2.960469e-23
-    ## 10  9.797214e-01
-    ## 11  1.000000e+00
-    ## 12  9.999990e-01
-    ## 13  9.383061e-01
-    ## 14  9.999354e-01
-    ## 15  1.000000e+00
-    ## 16  1.000000e+00
-    ## 17  9.997597e-01
-    ## 18  1.000000e+00
-    ## 19  3.550733e-01
-    ## 20  1.000000e+00
-    ## 21  1.490869e-05
-    ## 22  1.000000e+00
-    ## 23  1.000000e+00
-    ## 24  1.000000e+00
-    ## 25  1.000000e+00
-    ## 26  2.167173e-03
-    ## 27  1.000000e+00
-    ## 28  7.398978e-01
-    ## 29 9.803770e-179
-    ## 30  9.999985e-01
-    ## 31  1.000000e+00
-    ## 32  1.000000e+00
-    ## 33  1.213525e-47
-    ## 34 7.626527e-143
-    ## 35  1.000000e+00
-    ## 36 2.959245e-174
-    ## 37  1.000000e+00
-    ## 38  2.849248e-01
-    ## 39  2.960469e-23
-    ## 40  1.000000e+00
-    ## 41  1.000000e+00
-    ## 42  5.517590e-01
-    ## 43  3.889256e-01
-    ## 44  9.984997e-01
-    ## 45  3.367095e-01
-    ## 46  9.976080e-01
-    ## 47  5.094222e-36
-    ## 48  9.797214e-01
-    ## 49  9.997597e-01
-    ## 50  1.000000e+00
-    ## 51  1.213525e-47
-    ## 52  5.517590e-01
-    ## 53  2.154763e-70
-    ## 54  1.000000e+00
-    ## 55 1.780775e-203
-    ## 56  1.000000e+00
-    ## 57  1.000000e+00
-    ## 58  1.000000e+00
-    ## 59 7.626527e-143
-    ## 60  3.889256e-01
-    ## 61 1.093832e-148
-    ## 62  1.000000e+00
-    ## 63  1.000000e+00
-    ## 64  9.999990e-01
-    ## 65  3.550733e-01
-    ## 66  2.167173e-03
-    ## 67  1.000000e+00
-    ## 68  9.984997e-01
-    ## 69  1.000000e+00
-    ## 70  9.999787e-01
-    ## 71 1.227035e-183
-    ## 72  9.383061e-01
-    ## 73  1.000000e+00
-    ## 74  1.000000e+00
-    ## 75 2.959245e-174
-    ## 76  3.367095e-01
-    ## 77  2.154763e-70
-    ## 78 1.093832e-148
-    ## 79  1.000000e+00
-    ## 80  1.000000e+00
-    ## 81  9.999354e-01
-    ## 82  1.490869e-05
-    ## 83  7.398978e-01
-    ## 84  1.000000e+00
-    ## 85  9.976080e-01
-    ## 86  1.000000e+00
-    ## 87  1.000000e+00
-    ## 88  9.999787e-01
+    ##                 M1              M2 M1_size M2_size Inter_size          pval
+    ## 1        N2_yellow      LIPL4_blue     339     677        275 9.803770e-179
+    ## 2        N2_yellow     LIPL4_brown     339     149         14  2.849248e-01
+    ## 3        N2_yellow      DAF2_green     339     201         77  5.094222e-36
+    ## 4        N2_yellow       DAF2_blue     339     310        220 1.780775e-203
+    ## 5        N2_yellow      DAF2_brown     339     243          1  1.000000e+00
+    ## 6        N2_yellow RSKS1_turquoise     339     601        267 1.227035e-183
+    ## 7        N2_yellow     RSKS1_brown     339     330          0  1.000000e+00
+    ## 8         N2_brown      LIPL4_blue     389     677         32  9.999985e-01
+    ## 9         N2_brown     LIPL4_brown     389     149         57  2.960469e-23
+    ## 10        N2_brown      DAF2_green     389     201         11  9.797214e-01
+    ## 11        N2_brown       DAF2_blue     389     310          3  1.000000e+00
+    ## 12        N2_brown      DAF2_brown     389     243          5  9.999990e-01
+    ## 13        N2_brown RSKS1_turquoise     389     601         45  9.383061e-01
+    ## 14        N2_brown     RSKS1_brown     389     330         13  9.999354e-01
+    ## 15    N2_turquoise      LIPL4_blue     872     677         87  1.000000e+00
+    ## 16    N2_turquoise     LIPL4_brown     872     149          6  1.000000e+00
+    ## 17    N2_turquoise      DAF2_green     872     201         23  9.997597e-01
+    ## 18    N2_turquoise       DAF2_blue     872     310         11  1.000000e+00
+    ## 19    N2_turquoise      DAF2_brown     872     243         52  3.550733e-01
+    ## 20    N2_turquoise RSKS1_turquoise     872     601         53  1.000000e+00
+    ## 21    N2_turquoise     RSKS1_brown     872     330         98  1.490869e-05
+    ## 22        N2_green      LIPL4_blue      94     677          0  1.000000e+00
+    ## 23        N2_green     LIPL4_brown      94     149          0  1.000000e+00
+    ## 24        N2_green      DAF2_green      94     201          0  1.000000e+00
+    ## 25        N2_green       DAF2_blue      94     310          0  1.000000e+00
+    ## 26        N2_green      DAF2_brown      94     243         13  2.167173e-03
+    ## 27        N2_green RSKS1_turquoise      94     601          0  1.000000e+00
+    ## 28        N2_green     RSKS1_brown      94     330          6  7.398978e-01
+    ## 29      LIPL4_blue       N2_yellow     677     339        275 9.803770e-179
+    ## 30      LIPL4_blue        N2_brown     677     389         32  9.999985e-01
+    ## 31      LIPL4_blue    N2_turquoise     677     872         87  1.000000e+00
+    ## 32      LIPL4_blue        N2_green     677      94          0  1.000000e+00
+    ## 33      LIPL4_blue      DAF2_green     677     201        119  1.213525e-47
+    ## 34      LIPL4_blue       DAF2_blue     677     310        239 7.626527e-143
+    ## 35      LIPL4_blue      DAF2_brown     677     243         10  1.000000e+00
+    ## 36      LIPL4_blue RSKS1_turquoise     677     601        364 2.959245e-174
+    ## 37      LIPL4_blue     RSKS1_brown     677     330         13  1.000000e+00
+    ## 38     LIPL4_brown       N2_yellow     149     339         14  2.849248e-01
+    ## 39     LIPL4_brown        N2_brown     149     389         57  2.960469e-23
+    ## 40     LIPL4_brown    N2_turquoise     149     872          6  1.000000e+00
+    ## 41     LIPL4_brown        N2_green     149      94          0  1.000000e+00
+    ## 42     LIPL4_brown      DAF2_green     149     201          7  5.517590e-01
+    ## 43     LIPL4_brown       DAF2_blue     149     310         12  3.889256e-01
+    ## 44     LIPL4_brown      DAF2_brown     149     243          2  9.984997e-01
+    ## 45     LIPL4_brown RSKS1_turquoise     149     601         23  3.367095e-01
+    ## 46     LIPL4_brown     RSKS1_brown     149     330          4  9.976080e-01
+    ## 47      DAF2_green       N2_yellow     201     339         77  5.094222e-36
+    ## 48      DAF2_green        N2_brown     201     389         11  9.797214e-01
+    ## 49      DAF2_green    N2_turquoise     201     872         23  9.997597e-01
+    ## 50      DAF2_green        N2_green     201      94          0  1.000000e+00
+    ## 51      DAF2_green      LIPL4_blue     201     677        119  1.213525e-47
+    ## 52      DAF2_green     LIPL4_brown     201     149          7  5.517590e-01
+    ## 53      DAF2_green RSKS1_turquoise     201     601        134  2.154763e-70
+    ## 54      DAF2_green     RSKS1_brown     201     330          0  1.000000e+00
+    ## 55       DAF2_blue       N2_yellow     310     339        220 1.780775e-203
+    ## 56       DAF2_blue        N2_brown     310     389          3  1.000000e+00
+    ## 57       DAF2_blue    N2_turquoise     310     872         11  1.000000e+00
+    ## 58       DAF2_blue        N2_green     310      94          0  1.000000e+00
+    ## 59       DAF2_blue      LIPL4_blue     310     677        239 7.626527e-143
+    ## 60       DAF2_blue     LIPL4_brown     310     149         12  3.889256e-01
+    ## 61       DAF2_blue RSKS1_turquoise     310     601        233 1.093832e-148
+    ## 62       DAF2_blue     RSKS1_brown     310     330          0  1.000000e+00
+    ## 63      DAF2_brown       N2_yellow     243     339          1  1.000000e+00
+    ## 64      DAF2_brown        N2_brown     243     389          5  9.999990e-01
+    ## 65      DAF2_brown    N2_turquoise     243     872         52  3.550733e-01
+    ## 66      DAF2_brown        N2_green     243      94         13  2.167173e-03
+    ## 67      DAF2_brown      LIPL4_blue     243     677         10  1.000000e+00
+    ## 68      DAF2_brown     LIPL4_brown     243     149          2  9.984997e-01
+    ## 69      DAF2_brown RSKS1_turquoise     243     601          4  1.000000e+00
+    ## 70      DAF2_brown     RSKS1_brown     243     330          5  9.999787e-01
+    ## 71 RSKS1_turquoise       N2_yellow     601     339        267 1.227035e-183
+    ## 72 RSKS1_turquoise        N2_brown     601     389         45  9.383061e-01
+    ## 73 RSKS1_turquoise    N2_turquoise     601     872         53  1.000000e+00
+    ## 74 RSKS1_turquoise        N2_green     601      94          0  1.000000e+00
+    ## 75 RSKS1_turquoise      LIPL4_blue     601     677        364 2.959245e-174
+    ## 76 RSKS1_turquoise     LIPL4_brown     601     149         23  3.367095e-01
+    ## 77 RSKS1_turquoise      DAF2_green     601     201        134  2.154763e-70
+    ## 78 RSKS1_turquoise       DAF2_blue     601     310        233 1.093832e-148
+    ## 79 RSKS1_turquoise      DAF2_brown     601     243          4  1.000000e+00
+    ## 80     RSKS1_brown       N2_yellow     330     339          0  1.000000e+00
+    ## 81     RSKS1_brown        N2_brown     330     389         13  9.999354e-01
+    ## 82     RSKS1_brown    N2_turquoise     330     872         98  1.490869e-05
+    ## 83     RSKS1_brown        N2_green     330      94          6  7.398978e-01
+    ## 84     RSKS1_brown      LIPL4_blue     330     677         13  1.000000e+00
+    ## 85     RSKS1_brown     LIPL4_brown     330     149          4  9.976080e-01
+    ## 86     RSKS1_brown      DAF2_green     330     201          0  1.000000e+00
+    ## 87     RSKS1_brown       DAF2_blue     330     310          0  1.000000e+00
+    ## 88     RSKS1_brown      DAF2_brown     330     243          5  9.999787e-01
 
 ## Circos Plots
 
@@ -797,7 +710,13 @@ for (i in 1:length(tissuez)) {
 }
 ```
 
-<img src="Modules/Circos_plots/Neuron_circos_plot.svg" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" /><img src="Modules/Circos_plots/Intestine_circos_plot.svg" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" />
+    ## Note: 2 points are out of plotting region in sector 'RSKS1', track '2'.
+
+``` r
+knitr::include_graphics(plot_pathz)
+```
+
+<img src="Modules/Circos_plots/Germline_circos_plot.svg" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" /><img src="Modules/Circos_plots/Hypodermis_circos_plot.svg" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" /><img src="Modules/Circos_plots/Intestine_circos_plot.svg" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" /><img src="Modules/Circos_plots/Muscle_circos_plot.svg" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" /><img src="Modules/Circos_plots/Neuron_circos_plot.svg" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" /><img src="Modules/Circos_plots/Pharynx_circos_plot.svg" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" /><img src="Modules/Circos_plots/Vulva_uterus_circos_plot.svg" width="500\linewidth" height="500\linewidth" style="display: block; margin: auto;" />
 
 ``` r
 sessionInfo()
