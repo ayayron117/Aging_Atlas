@@ -24,17 +24,28 @@ tissuez <- c("Germline", "Hypodermis", "Intestine", "Muscle",
              "Neuron", "Pharynx", "Vulva_uterus")
 ```
 
-# WGCNA & Module Trait Correlation
+## WGCNA & Module Trait Correlation
 
-## In this section, I wrote a function that does the following:
+<div style="font-size: 16px">
 
-## \* Subsets the full seurat object by tissue
+In this section, I wrote a function that does the following:
+<ul>
+<li>
+Subsets the full seurat object by tissue
+</li>
+<li>
+Performs WGCNA on each genotype
+</li>
+<li>
+Calculates each gene module’s correlation with age
+</li>
+<li>
+Calculates the gene intersection sizes between the modules of each
+genotype
+</li>
+</ul>
 
-## \* Performs WGCNA on each genotype
-
-## \* Calculates each gene module’s correlation with age
-
-## \* Calculates the gene intersection sizes between the modules of each genotype
+</div>
 
 ``` r
 modules.correlations.func <- function (tissue_name) {
