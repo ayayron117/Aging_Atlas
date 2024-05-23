@@ -8,16 +8,15 @@ output: html_document
 
 library(hdWGCNA)
 library(Seurat)
-library(tidyverse)
-library(cowplot)
-library(patchwork)
-library(WGCNA) 
-library(enrichR)
+# library(tidyverse)
+# library(cowplot)
+# library(patchwork)
+library(WGCNA)
+# library(enrichR)
 library(GeneOverlap)
 library(pheatmap)
-library(sjmisc)
+# library(sjmisc)
 library(dplyr)
-library(GeneOverlap)
 library(reshape2)
 library(igraph)
 library(scales)
@@ -91,6 +90,12 @@ consensus.modules.func <- function (tissue_name) {
                             multi.group.by='geno', 
                             assay = 'RNA', 
                             slot = 'data')
+  
+  consensus <- SetDatExpr(consensus,
+                group_name = c("N2", "LIPL4", "DAF2", "RSKS1"),
+                group.by= 'geno', 
+                assay = 'RNA', 
+                slot = 'data')
   
   # Test different soft powers:
   consensus <- TestSoftPowers(consensus,
@@ -368,7 +373,7 @@ age.cor.heatmap <- function (tissue_name) {
   
   consensus_tissue_name <- paste('consensus',sep= '_', tissue_name)
   file_name <- paste0(consensus_tissue_name, sep= "_", "seurat", sep= ".", "RData") 
-  consensus <- readRDS(file.path(tissue_dir, file_name))
+  # consensus <- readRDS(file.path(tissue_dir, file_name))
 
   ### Correlation ###
   strings <- consensus@meta.data[["genotype"]]
@@ -420,7 +425,7 @@ age.cor.heatmap <- function (tissue_name) {
   colorRampPalette(brewer.pal(9,"Blues"))(100)-> heat.colors
   
   pdf(file.path(tissue_dir, paste(tissue_name, "heatmap.pdf", sep="_")))
-  pheatmap(day_cor,scale = "none",cluster_rows=T,cluster_col=F,color = heat.colors,border_color=NA)
+  pheatmap(day_cor,scale = "none",cluster_rows=F,cluster_col=F,color = heat.colors,border_color=NA, annotation_colors = c("yellow", "green", "brown", "red", "blue", "turqoise", "black"),annotation = day_cor)
   dev.off()
   
 }    
